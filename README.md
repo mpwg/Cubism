@@ -9,8 +9,7 @@
   Erfassen, prüfen, lösen und Schritt für Schritt nachvollziehen.
 </p>
 
-<p align="center">
-  <a href="https://github.com/mpwg/Cubism/stargazers"><img src="https://img.shields.io/github/stars/mpwg/Cubism?style=flat-square" alt="GitHub stars" /></a>
+<p align="center">  
   <a href="https://github.com/mpwg/Cubism/commits/main"><img src="https://img.shields.io/github/last-commit/mpwg/Cubism?style=flat-square" alt="Letzter Commit" /></a>
   <a href="https://github.com/mpwg/Cubism/issues"><img src="https://img.shields.io/github/issues/mpwg/Cubism?style=flat-square" alt="Offene Issues" /></a>
   <a href="https://github.com/mpwg/Cubism/blob/main/LICENSE.md"><img src="https://img.shields.io/github/license/mpwg/Cubism?style=flat-square" alt="Lizenz" /></a>
