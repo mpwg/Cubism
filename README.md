@@ -23,14 +23,6 @@
   <img src="https://img.shields.io/badge/PWA-Offline-11110f?style=flat-square&logo=pwa&logoColor=F6C915" alt="PWA und Offline" />
 </p>
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Zustand-State-11110f?style=flat-square&logo=zustand&logoColor=white" alt="Zustand" />
-  <img src="https://img.shields.io/badge/Comlink-Web%20Worker-11110f?style=flat-square" alt="Comlink und Web Worker" />
-  <img src="https://img.shields.io/badge/min2phase.js-3x3%20Solver-11110f?style=flat-square" alt="min2phase.js" />
-  <img src="https://img.shields.io/badge/Dexie-IndexedDB-11110f?style=flat-square&logo=indexeddb&logoColor=white" alt="Dexie und IndexedDB" />
-  <img src="https://img.shields.io/badge/Vitest-Playwright-11110f?style=flat-square&logo=vitest&logoColor=6E9F18" alt="Vitest und Playwright" />
-</p>
-
 Cubism ist eine vollständig client-seitige Webanwendung für das Lösen von Rubik's Cubes im Browser. Der Schwerpunkt liegt auf einem soliden `3x3`-Pfad, ohne Server, ohne Cloud-Zwang und mit einer Oberfläche, die nicht nur eine Zugliste ausspuckt, sondern den Lösungsweg verständlich macht.
 
 Die App kombiniert lokale Erfassung, fachliche Validierung, Solver-Ausführung in Workern und eine visuelle Wiedergabe des Lösungswegs. Sie ist als PWA angelegt, offline nutzbar und hält die Tür für `4x4` offen, ohne den aktuellen Stand künstlich größer zu reden als er ist.
