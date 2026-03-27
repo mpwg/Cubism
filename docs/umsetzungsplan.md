@@ -4,13 +4,13 @@
 
 Ziel:
 
-Eine lokale Webanwendung mit stabilem `4x4`-Zustandsmodell und korrekter Move-Engine.
+Eine lokale Webanwendung mit dimensionsfähigem Zustandsmodell, korrekter Move-Engine und primärem `3x3`-Pfad.
 
 Umfang:
 
 - Projektgrundstruktur
 - PWA-Grundlage
-- `4x4`-State-Modell
+- `3x3`-/`4x4`-State-Modell
 - Notation und Move-Engine
 - Tests für Zugoperationen
 
@@ -18,7 +18,7 @@ Umfang:
 
 Ziel:
 
-Ein Benutzer kann einen `4x4`-Würfel vollständig von Hand eingeben.
+Ein Benutzer kann einen `3x3`-Würfel vollständig von Hand eingeben; die Struktur bleibt für `4x4` offen.
 
 Umfang:
 
@@ -31,7 +31,7 @@ Umfang:
 
 Ziel:
 
-Ein lokal laufender Solver berechnet einen vollständigen Lösungsweg.
+Ein lokal laufender Solver berechnet zunächst für `3x3` einen vollständigen Lösungsweg und bereitet `4x4` als Reduktionspfad vor.
 
 Umfang:
 

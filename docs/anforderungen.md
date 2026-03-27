@@ -2,13 +2,13 @@
 
 ## Produktziel
 
-Cubism ist eine rein client-seitige Webanwendung für das Lösen eines `4x4x4`-Rubik's-Cube. Die Anwendung läuft vollständig lokal im Browser, soll als PWA installierbar sein und auch offline funktionieren.
+Cubism ist eine rein client-seitige Webanwendung für das Lösen von Rubik's Cubes im Browser. Die Anwendung läuft vollständig lokal, soll als PWA installierbar sein und auch offline funktionieren. Primärer Zielwürfel ist `3x3x3`; `4x4x4` ist eine nachgelagerte Erweiterung.
 
 ## Muss-Anforderungen
 
 - Die Anwendung läuft ohne Server und ohne Cloud-Abhängigkeit.
 - Die Anwendung funktioniert offline nach erfolgreicher Installation oder nach dem ersten Laden.
-- Der Benutzer kann einen `4x4x4`-Würfelzustand manuell eingeben.
+- Der Benutzer kann einen `3x3x3`-Würfelzustand manuell eingeben.
 - Die Anwendung validiert, ob der eingegebene Zustand plausibel und lösbar ist.
 - Die Anwendung berechnet lokal einen Lösungsweg.
 - Die Anwendung visualisiert den Lösungsweg verständlich und schrittweise.
@@ -31,7 +31,7 @@ Cubism ist eine rein client-seitige Webanwendung für das Lösen eines `4x4x4`-R
 
 ## Fachliche Randbedingungen
 
-- Zielwürfelgröße ist zunächst ausschließlich `4x4x4`.
+- Zielwürfelgröße ist zunächst `3x3x3`, mit vorbereiteter Erweiterung für `4x4x4`.
 - Die Lösung soll möglichst auf bestehenden Offline-Bibliotheken aufbauen.
 - Für den finalen `3x3`-Teil der Reduktion soll eine etablierte Browser-Bibliothek verwendet werden.
 - Rechenintensive Solverschritte sollen nach Möglichkeit in Web Workern laufen, damit die Oberfläche bedienbar bleibt.
@@ -40,7 +40,7 @@ Cubism ist eine rein client-seitige Webanwendung für das Lösen eines `4x4x4`-R
 
 ### 1. Manuelle Eingabe
 
-1. Der Benutzer wählt `4x4x4`.
+1. Der Benutzer wählt `3x3x3` oder später `4x4x4`.
 2. Die Anwendung zeigt alle sechs Seiten mit je `16` Stickern.
 3. Der Benutzer trägt die Farben ein.
 4. Die Anwendung prüft den Zustand.
