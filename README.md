@@ -1,6 +1,6 @@
 # Cubism
 
-Cubism ist als rein client-seitige HTML-Webanwendung geplant. Die Anwendung soll als PWA installierbar sein, offline laufen und einen `4x4x4`-Rubik's-Cube lösen können.
+Cubism ist als rein client-seitige HTML-Webanwendung geplant. Die Anwendung soll als PWA installierbar sein, offline laufen und primär einen `3x3x3`-Rubik's-Cube lösen können. `4x4x4` ist als Erweiterung mit eigener Reduktionslogik vorgesehen.
 
 Der Fokus liegt auf drei Bereichen:
 

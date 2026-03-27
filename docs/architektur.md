@@ -11,13 +11,13 @@
 
 ### Bestehende Bibliotheken
 
-- `min2phase.js` für den `3x3x3`-Lösungsanteil im Browser
+- `min2phase.js` für den primären `3x3x3`-Lösungsanteil im Browser
 - optional `cubing.js` für Notation, Puzzle-Hilfsfunktionen und Darstellungsnähe
 
 ### Eigene Komponenten
 
-- `4x4x4`-Zustandsmodell
-- `4x4x4`-Move-Engine
+- dimensionsfähiges Zustandsmodell für `3x3x3` und `4x4x4`
+- dimensionsfähige Move-Engine
 - Reduktionslogik von `4x4x4` nach `3x3x3`
 - Erkennung und Behandlung von Paritäten
 - manuelle Eingabeoberfläche
@@ -30,14 +30,14 @@
 
 Verantwortung:
 
-- Repräsentation des `4x4x4`-Zustands
+- Repräsentation des Würfelzustands mit Dimension `3` oder `4`
 - Lesen und Schreiben einzelner Sticker
 - Serialisierung und Deserialisierung
 - Erzeugung eines gelösten Ausgangszustands
 
 Empfehlung:
 
-- zunächst stickerbasiertes Modell
+- zunächst stickerbasiertes Modell mit Dimensionsmetadaten
 - später optional zusätzliche abgeleitete Piece-Sichten
 
 ### 2. Move Engine
@@ -86,7 +86,7 @@ Ausgabe:
 
 Verantwortung:
 
-- Übergabe des reduzierten Zustands an `min2phase.js`
+- direkte Übergabe von `3x3` oder Übergabe des reduzierten `4x4`-Zustands an `min2phase.js`
 - Rückübersetzung der `3x3`-Lösung in die Gesamtzugliste
 - Ausführung möglichst in einem Web Worker
 
