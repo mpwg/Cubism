@@ -7,6 +7,34 @@ import { defineConfig } from "vitest/config";
 const rootDir = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
+  build: {
+    chunkSizeWarningLimit: 900,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes("/node_modules/three/examples/")) {
+            return "three-examples";
+          }
+
+          if (id.includes("/node_modules/three/src/renderers/")) {
+            return "three-renderers";
+          }
+
+          if (id.includes("/node_modules/three/src/math/")) {
+            return "three-math";
+          }
+
+          if (id.includes("/node_modules/three/src/")) {
+            return "three-core";
+          }
+
+          if (id.includes("/node_modules/@react-three/fiber/")) {
+            return "react-three-fiber";
+          }
+        }
+      }
+    }
+  },
   plugins: [
     react(),
     VitePWA({

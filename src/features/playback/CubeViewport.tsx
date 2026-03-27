@@ -1,12 +1,42 @@
-import { Canvas } from "@react-three/fiber";
-import { OrbitControls } from "@react-three/drei";
+import { useRef } from "react";
+import { Canvas, extend, useFrame, useThree, type ThreeElement } from "@react-three/fiber";
+import { OrbitControls as ThreeOrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { cubeColorHex, type CubeState, type Move, type RenderCubie } from "@/domain/cube/types";
 import { toRenderCubies } from "@/domain/cube/render";
 import { isPositionAffectedByMove } from "@/domain/cube/coordinates";
 
+extend({ OrbitControls: ThreeOrbitControls });
+
+declare module "@react-three/fiber" {
+  interface ThreeElements {
+    orbitControls: ThreeElement<typeof ThreeOrbitControls>;
+  }
+}
+
 interface CubeViewportProps {
   readonly state: CubeState;
   readonly activeMove?: Move;
+}
+
+function CameraControls() {
+  const controlsRef = useRef<ThreeOrbitControls | null>(null);
+  const { camera, gl } = useThree();
+
+  useFrame(() => {
+    controlsRef.current?.update();
+  });
+
+  return (
+    <orbitControls
+      ref={controlsRef}
+      args={[camera, gl.domElement]}
+      enableDamping
+      dampingFactor={0.08}
+      enablePan={false}
+      minDistance={7}
+      maxDistance={18}
+    />
+  );
 }
 
 function Cubie({ cubie, dimension, activeMove }: { cubie: RenderCubie; dimension: number; activeMove?: Move }) {
@@ -46,7 +76,7 @@ export function CubeViewport({ state, activeMove }: CubeViewportProps) {
             <Cubie key={cubie.id} cubie={cubie} dimension={state.dimension} activeMove={activeMove} />
           ))}
         </group>
-        <OrbitControls enablePan={false} minDistance={7} maxDistance={18} />
+        <CameraControls />
       </Canvas>
     </div>
   );
