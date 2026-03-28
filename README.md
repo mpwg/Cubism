@@ -131,7 +131,19 @@ Die fachliche und technische Planung liegt bewusst im Repository und nicht in K√
 
 - [`docs/anforderungen.md`](./docs/anforderungen.md)
 - [`docs/architektur.md`](./docs/architektur.md)
+- [`docs/deployment.md`](./docs/deployment.md)
 - [`docs/umsetzungsplan.md`](./docs/umsetzungsplan.md)
+
+## Deployment
+
+Das produktive Ziel f√ºr Cubism ist `https://cubism.gehri.xyz`.
+
+- Hosting: Cloudflare Pages
+- Quelle: GitHub-Integration auf `mpwg/Cubism`
+- Build: `npm run build`
+- Artefakt: `dist/`
+- auch auf anderen Static-Hosting-Plattformen betreibbar, solange HTTPS, SPA-Fallback und PWA-Dateien sauber ausgeliefert werden
+- Betriebs- und Rollback-Hinweise: [`docs/deployment.md`](./docs/deployment.md)
 
 ## Roadmap
 
