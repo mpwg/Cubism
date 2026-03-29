@@ -42,7 +42,8 @@ export default defineConfig({
       srcDir: "src/pwa",
       filename: "sw.ts",
       injectManifest: {
-        globPatterns: ["**/*.{js,css,html,svg,png,webp,woff2}"]
+        globPatterns: ["**/*.{js,css,html,svg,png,webp,woff2}"],
+        maximumFileSizeToCacheInBytes: 12 * 1024 * 1024
       },
       registerType: "prompt",
       includeAssets: ["favicon.svg", "mask-icon.svg"],
