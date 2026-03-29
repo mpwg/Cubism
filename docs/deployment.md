@@ -24,6 +24,12 @@ Diese Entscheidung passt zur aktuellen App-Struktur: Cubism ist vollständig cli
 - Output-Verzeichnis: `dist`
 - für Cloudflare Pages zusätzlich: `.node-version` auf `24.14.1`, damit die Build-Umgebung dieselbe Node-Version verwendet
 
+GitHub-seitige Verifikation vor dem Deployment:
+
+- `npm run verify:ci` für Typecheck, Unit-Tests und produktionsnahen Build
+- `npm run test:e2e` für den Browser-Kernfluss
+- diese Checks sollen als Required Status Checks auf `main` hinterlegt werden, damit Cloudflare Pages nur getestete Commits aus `main` deployt
+
 Technisch relevante Punkte der App:
 
 - keine Backend-Abhängigkeit
@@ -118,6 +124,12 @@ Für dieses Repository ist Cloudflare Pages direkt mit GitHub verbunden. Das bed
 
 Die Integration braucht für den normalen Betrieb keine eigene Deploy-Logik im Repository. Es gibt hier bewusst keinen separaten GitHub-Action-Deploy-Workflow mehr, weil Build und Veröffentlichung direkt in Cloudflare Pages konfiguriert sind.
 
+Wichtig für CI/CD:
+
+- das Repository prüft Änderungen in GitHub Actions vor dem Merge mit Typecheck, Unit-Tests, Build und Playwright-E2E
+- Cloudflare Pages deployt anschließend den Commit aus `main`
+- damit diese Tests das Deployment tatsächlich absichern, muss `main` in GitHub gegen direkte ungeprüfte Merges geschützt sein
+
 Für ein neues Projekt auf einer anderen Cloudflare-Domain ist der Ablauf:
 
 1. in Cloudflare Pages ein neues Projekt anlegen
@@ -178,8 +190,9 @@ Danach:
 ### Laufende Updates
 
 1. Änderungen per Pull Request mergen
-2. automatisches Production Deployment von `main` abwarten
-3. Smoke-Test auf `cubism.gehri.xyz` durchführen
+2. erfolgreiche GitHub-CI mit `verify` und Playwright abwarten
+3. automatisches Production Deployment von `main` abwarten
+4. Smoke-Test auf `cubism.gehri.xyz` durchführen
 
 Für andere Hosts ist derselbe Ablauf identisch, nur der automatische Trigger kann anders aussehen:
 
