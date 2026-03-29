@@ -50,9 +50,9 @@ Cubism ist eine rein client-seitige Webanwendung für das Lösen von Rubik's Cub
 ### 2. Kamera-/Fotoerfassung
 
 1. Der Benutzer startet die Kameraerfassung.
-2. Die Anwendung erfasst nacheinander sechs Seiten.
+2. Die Anwendung erfasst bevorzugt drei benachbarte Seiten als schnelle Grundlage.
 3. Die Anwendung erkennt lokal die Stickerfarben.
-4. Der Benutzer korrigiert fehlerhafte Erkennung bei Bedarf.
+4. Der Benutzer ergänzt oder korrigiert fehlende bzw. fehlerhafte Sticker bei Bedarf.
 5. Die Anwendung prüft den Zustand.
 6. Die Anwendung berechnet und visualisiert den Lösungsweg.
 

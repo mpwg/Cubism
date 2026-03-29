@@ -30,7 +30,7 @@ Die App kombiniert lokale Erfassung, fachliche Validierung, Solver-Ausführung i
 ## Was Cubism bereits kann
 
 - Würfelzustände lokal im Browser erfassen
-- Gesichter per Bildupload oder Kamera einlesen
+- drei benachbarte Seiten per Bildupload oder Kamera als schnelle Grundlage einlesen
 - erkannte Sticker vor dem Solve prüfen und korrigieren
 - Zustände validieren und auf Plausibilität prüfen
 - `3x3`-Lösungen lokal berechnen
@@ -52,7 +52,7 @@ Der primäre Fokus liegt derzeit auf `3x3`. `4x4` ist in Datenmodell und UI sich
 
 Konkret vorhanden sind bereits:
 
-- Capture-Workflow für Upload und Kamera
+- Capture-Workflow für Upload und Kamera mit Drei-Seiten-Einstieg
 - Review-Schritt für manuelle Korrekturen
 - lokaler Solve für `3x3` über `min2phase.js`
 - Playback mit Zugliste, Phasen und Steuerung

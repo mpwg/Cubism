@@ -21,7 +21,7 @@ export function ReviewScreen() {
 
   async function handleValidate() {
     if (!cubeState) {
-      setError("Der Würfelzustand ist noch nicht vollständig.");
+      setError("Es fehlen noch Sticker. Ergänze die übrigen Flächen im Review oder über den Edit-Modus am 3D-Würfel.");
       return;
     }
 
@@ -67,7 +67,7 @@ export function ReviewScreen() {
             <h2>Farben prüfen und korrigieren</h2>
           </div>
           <p className="panel-card__meta">
-            Aktive Dimension: {dimension}x{dimension}
+            Aktive Dimension: {dimension}x{dimension} · Fotos sind nur die Grundlage, fehlende Sticker kannst du hier direkt ergänzen.
           </p>
         </div>
 

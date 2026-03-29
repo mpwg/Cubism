@@ -16,7 +16,7 @@ export function SolveScreen() {
 
   async function handleSolve() {
     if (!cubeState) {
-      setLocalError("Es liegt noch kein vollständiger Würfelzustand vor.");
+      setLocalError("Der Würfelzustand ist noch nicht vollständig ergänzt.");
       return;
     }
 
