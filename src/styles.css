@@ -314,6 +314,11 @@ button {
   min-height: 0;
 }
 
+.face-card--highlighted {
+  border-color: rgba(213, 90, 53, 0.45);
+  box-shadow: inset 0 0 0 1px rgba(213, 90, 53, 0.18);
+}
+
 .face-card__header-meta {
   display: flex;
   gap: 8px;
@@ -354,6 +359,10 @@ button {
 
 .face-grid__sticker--selected {
   box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.95);
+}
+
+.face-grid__sticker--highlighted {
+  box-shadow: inset 0 0 0 3px rgba(213, 90, 53, 0.95);
 }
 
 .camera-panel__video {
@@ -509,6 +518,36 @@ button {
 .phase-list {
   display: grid;
   gap: 10px;
+}
+
+.review-feedback {
+  display: grid;
+  gap: 12px;
+}
+
+.review-feedback__groups {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.review-feedback__group {
+  display: grid;
+  gap: 6px;
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.review-feedback__group h3,
+.review-feedback__group p {
+  margin: 0;
+}
+
+.review-feedback__group p,
+.review-feedback__group small {
+  color: rgba(243, 238, 226, 0.72);
 }
 
 .playback-status {

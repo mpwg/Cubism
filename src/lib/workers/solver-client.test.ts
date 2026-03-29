@@ -9,7 +9,16 @@ describe("solver client", () => {
 
   it("verwendet einen Worker-Client als Singleton für Validierung und Solve", async () => {
     const api = {
-      validate: vi.fn(async () => ({ ok: true, errors: [], reduced: true })),
+      validate: vi.fn(async () => ({
+        ok: true,
+        status: "ok",
+        errors: [],
+        groups: [],
+        highlightedFaces: [],
+        highlightedStickers: [],
+        nextAction: "Der Zustand ist belastbar validiert und kann in den Solve-Schritt übernommen werden.",
+        reduced: true
+      })),
       solve: vi.fn(async () => ({
         initial: createSolvedCubeState(3),
         final: createSolvedCubeState(3),

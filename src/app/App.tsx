@@ -557,13 +557,16 @@ export function App() {
                   {validationResult.ok ? (
                     <p className="success-text">Der aktuelle Zustand ist solverfähig.</p>
                   ) : (
-                    <ul className="message-list">
-                      {validationResult.errors.map((validationError) => (
-                        <li key={`${validationError.code}-${validationError.index ?? validationError.face ?? "global"}`}>
-                          {validationError.message}
-                        </li>
-                      ))}
-                    </ul>
+                    <>
+                      <p className="inline-error">{validationResult.nextAction}</p>
+                      <ul className="message-list">
+                        {validationResult.errors.map((validationError) => (
+                          <li key={`${validationError.code}-${validationError.index ?? validationError.face ?? "global"}`}>
+                            {validationError.message}
+                          </li>
+                        ))}
+                      </ul>
+                    </>
                   )}
                 </div>
               ) : null}

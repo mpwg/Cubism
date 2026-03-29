@@ -13,6 +13,7 @@ export function SolveScreen() {
   const setScreen = useAppStore((state) => state.setScreen);
   const dimension = useAppStore((state) => state.dimension);
   const [localError, setLocalError] = useState<string | null>(null);
+  const solveBlocked = !validationResult?.ok;
 
   async function handleSolve() {
     if (!cubeState) {
@@ -50,7 +51,9 @@ export function SolveScreen() {
         {validationResult?.ok ? (
           <p className="success-text">Der erfasste Zustand ist solverfähig.</p>
         ) : (
-          <p className="inline-error">Der Zustand sollte vor dem Solve noch einmal geprüft werden.</p>
+          <p className="inline-error">
+            {validationResult ? validationResult.nextAction : "Der Zustand wurde nach der letzten Änderung noch nicht erneut validiert."}
+          </p>
         )}
 
         {dimension === 3 ? (
@@ -67,7 +70,7 @@ export function SolveScreen() {
           <button type="button" className="secondary-button" onClick={() => setScreen("review")}>
             Zurück
           </button>
-          <button type="button" className="primary-button" onClick={() => void handleSolve()}>
+          <button type="button" className="primary-button" onClick={() => void handleSolve()} disabled={solveBlocked || solveStatus === "running"}>
             {solveStatus === "running" ? "Berechne …" : "Lösung berechnen"}
           </button>
         </div>
