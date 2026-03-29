@@ -192,14 +192,15 @@ export function PlaybackScreen() {
         <ol className="move-list">
           {solveResult.moves.map((move, index) => {
             const moveMeta = describeMove(move);
+            const isActive = deferredMoveIndex === index + 1;
 
             return (
-              <li key={`${formatMove(move)}-${index}`} className="move-list__item">
+              <li key={`${formatMove(move)}-${index}`} className={`move-list__item${isActive ? " move-list__item--active" : ""}`}>
                 <button
                   type="button"
-                  className={`move-list__button${deferredMoveIndex === index + 1 ? " move-list__button--active" : ""}`}
+                  className={`move-list__button${isActive ? " move-list__button--active" : ""}`}
                   aria-label={`${index + 1}. ${moveMeta.notation}`}
-                  aria-current={deferredMoveIndex === index + 1 ? "step" : undefined}
+                  aria-current={isActive ? "step" : undefined}
                   onClick={() => stopAndRun(() => setPlaybackIndex(index + 1))}
                 >
                   <span>{index + 1}. {moveMeta.notation}</span>
