@@ -37,7 +37,7 @@ export function App() {
   const [workbenchOpen, setWorkbenchOpen] = useState(false);
   const [projectInfoOpen, setProjectInfoOpen] = useState(false);
   const [viewportEditMode, setViewportEditMode] = useState(false);
-  const [pendingSticker, setPendingSticker] = useState<{ face: Face; index: number } | null>(null);
+  const [pendingSticker, setPendingSticker] = useState<{ face: Face; index: number; x: number; y: number } | null>(null);
   const [pwaActionError, setPwaActionError] = useState<string | null>(null);
   const dimension = useAppStore((state) => state.dimension);
   const screen = useAppStore((state) => state.screen);
@@ -236,7 +236,14 @@ export function App() {
               state={viewportState}
               activeMove={activeMove}
               editable={viewportEditMode}
-              onStickerSelect={(selection) => setPendingSticker(selection)}
+              onStickerSelect={(selection) =>
+                setPendingSticker({
+                  face: selection.face,
+                  index: selection.index,
+                  x: Math.max(180, Math.min(selection.clientX, window.innerWidth - 180)),
+                  y: Math.max(170, Math.min(selection.clientY, window.innerHeight - 28))
+                })
+              }
             />
           </Suspense>
 
@@ -256,7 +263,15 @@ export function App() {
             </div>
 
             {pendingSticker ? (
-              <div className="viewport-palette" role="dialog" aria-label="Farbe für Sticker wählen">
+              <div
+                className="viewport-palette"
+                role="dialog"
+                aria-label="Farbe für Sticker wählen"
+                style={{
+                  left: pendingSticker.x,
+                  top: pendingSticker.y
+                }}
+              >
                 <div className="viewport-palette__header">
                   <div>
                     <p className="eyebrow">Edit</p>

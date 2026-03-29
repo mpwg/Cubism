@@ -372,6 +372,8 @@ button {
 }
 
 .viewport-palette {
+  position: fixed;
+  z-index: 20;
   display: grid;
   gap: 14px;
   padding: 16px 18px;
@@ -379,6 +381,8 @@ button {
   background: rgba(21, 21, 19, 0.92);
   border: 1px solid rgba(255, 255, 255, 0.08);
   min-width: min(100%, 360px);
+  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.42);
+  transform: translate(-50%, -100%);
 }
 
 .viewport-palette__header {

@@ -22,7 +22,7 @@ interface CubeViewportProps {
   readonly state: CubeState;
   readonly activeMove?: Move;
   readonly editable?: boolean;
-  readonly onStickerSelect?: (selection: { face: Face; index: number }) => void;
+  readonly onStickerSelect?: (selection: { face: Face; index: number; clientX: number; clientY: number }) => void;
 }
 
 const faceByMaterialIndex = ["R", "L", "U", "D", "F", "B"] as const;
@@ -59,7 +59,7 @@ function Cubie({
   dimension: number;
   activeMove?: Move;
   editable?: boolean;
-  onStickerSelect?: (selection: { face: Face; index: number }) => void;
+  onStickerSelect?: (selection: { face: Face; index: number; clientX: number; clientY: number }) => void;
 }) {
   const highlight = activeMove ? isPositionAffectedByMove(dimension as 3 | 4, cubie.position, activeMove) : false;
   const base = highlight ? "#1f8dff" : "#171717";
@@ -91,7 +91,9 @@ function Cubie({
     event.stopPropagation();
     onStickerSelect({
       face,
-      index: faceRowColToStickerIndex(dimension as 3 | 4, face, address.row, address.col) % (dimension * dimension)
+      index: faceRowColToStickerIndex(dimension as 3 | 4, face, address.row, address.col) % (dimension * dimension),
+      clientX: event.nativeEvent.clientX,
+      clientY: event.nativeEvent.clientY
     });
   }
 
