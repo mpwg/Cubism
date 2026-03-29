@@ -81,6 +81,7 @@ Minimaler Abnahmetest nach dem Deployment:
 - `manifest.webmanifest` ist erreichbar
 - `sw.js` wird erfolgreich registriert
 - App funktioniert nach erstem Besuch auch offline weiter
+- ein neuer Build meldet sich kontrolliert als Update statt still mitten im Betrieb aktiv zu werden
 
 ## Plattformunabhängige Konfigurationspunkte
 
@@ -207,6 +208,7 @@ Minimaler Smoke-Test:
 - Solve eines `3x3` funktioniert
 - Playback startet
 - Reload funktioniert
+- Offline-Reload nach einem erfolgreichen Erstbesuch funktioniert
 
 ## Rollback
 

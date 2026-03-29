@@ -1,4 +1,4 @@
-import { Suspense, lazy, startTransition, useEffect } from "react";
+import { Suspense, lazy, startTransition, useEffect, useState } from "react";
 import type { AppScreen } from "@/app/types";
 import { useAppStore } from "@/app/store";
 import { createSolvedCubeState } from "@/domain/cube/cube-state";
@@ -10,6 +10,7 @@ import { SolveScreen } from "@/features/solve/SolveScreen";
 import { PlaybackScreen } from "@/features/playback/PlaybackScreen";
 import { faceDisplayName, faceOrder } from "@/domain/cube/types";
 import { loadAppSnapshot, saveAppSnapshot, serializeSnapshotInput } from "@/lib/persistence/snapshot";
+import { applyPwaUpdate, promptForInstall, usePwaState } from "@/pwa/state";
 
 const screenLabels: Record<AppScreen, string> = {
   capture: "Capture",
@@ -24,6 +25,7 @@ const CubeViewport = lazy(async () => {
 });
 
 export function App() {
+  const [pwaActionError, setPwaActionError] = useState<string | null>(null);
   const dimension = useAppStore((state) => state.dimension);
   const screen = useAppStore((state) => state.screen);
   const captureSession = useAppStore((state) => state.captureSession);
@@ -35,6 +37,7 @@ export function App() {
   const solveError = useAppStore((state) => state.solveError);
   const validationResult = useAppStore((state) => state.validationResult);
   const hydrate = useAppStore((state) => state.hydrate);
+  const pwaState = usePwaState();
 
   useEffect(() => {
     let active = true;
@@ -96,6 +99,22 @@ export function App() {
   const viewportState = screen === "playback" && playbackStates[playback.moveIndex] ? playbackStates[playback.moveIndex] : cubeState ?? createSolvedCubeState(dimension);
   const activeMove = solveResult && playback.moveIndex > 0 ? solveResult.moves[playback.moveIndex - 1] : undefined;
 
+  async function handleInstall() {
+    setPwaActionError(null);
+    const result = await promptForInstall();
+    if (result === "unavailable") {
+      setPwaActionError("Auf dieser Plattform steht gerade kein Installationsprompt bereit.");
+    }
+  }
+
+  async function handleUpdate() {
+    setPwaActionError(null);
+    const applied = await applyPwaUpdate();
+    if (!applied) {
+      setPwaActionError("Das Update konnte gerade nicht angewendet werden.");
+    }
+  }
+
   return (
     <div className="app-shell">
       <aside className="side-panel">
@@ -106,6 +125,54 @@ export function App() {
             Primär für `3x3`, vollständig client-seitig, als PWA installierbar und offline nutzbar.
           </p>
         </header>
+
+        {pwaState.isOffline ? (
+          <div className="inline-info" data-testid="offline-banner">
+            Offline: Es läuft der zuletzt geladene App-Stand aus dem lokalen Cache.
+          </div>
+        ) : null}
+
+        {pwaState.isOfflineReady ? (
+          <div className="success-text">
+            Offline bereit: Nach diesem erfolgreichen Laden bleibt die App-Shell auch ohne Netzwerk startfähig.
+          </div>
+        ) : null}
+
+        {pwaState.needsRefresh ? (
+          <div className="panel-card panel-card--compact">
+            <div>
+              <p className="eyebrow">Update</p>
+              <h3>Neuer App-Stand verfügbar</h3>
+            </div>
+            <p className="panel-card__meta">
+              Ein neuer Build liegt bereit. Das Update wird erst nach deiner Bestätigung aktiviert, damit App-Shell und lokaler Zustand konsistent bleiben.
+            </p>
+            <div className="action-row">
+              <button type="button" className="primary-button" onClick={() => void handleUpdate()}>
+                Update anwenden
+              </button>
+            </div>
+          </div>
+        ) : null}
+
+        {pwaState.installPromptAvailable ? (
+          <div className="panel-card panel-card--compact">
+            <div>
+              <p className="eyebrow">Installation</p>
+              <h3>Cubism als App installieren</h3>
+            </div>
+            <p className="panel-card__meta">
+              Für den produktiven Offline-Einsatz empfiehlt sich die Installation als PWA auf dem Gerät.
+            </p>
+            <div className="action-row">
+              <button type="button" className="primary-button" onClick={() => void handleInstall()}>
+                App installieren
+              </button>
+            </div>
+          </div>
+        ) : null}
+
+        {pwaActionError ? <p className="inline-error">{pwaActionError}</p> : null}
 
         <nav className="step-nav">
           {(["capture", "review", "solve", "playback"] as AppScreen[]).map((step) => (
