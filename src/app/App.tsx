@@ -236,6 +236,9 @@ export function App() {
               state={viewportState}
               activeMove={activeMove}
               editable={viewportEditMode}
+              playbackMoveIndex={screen === "playback" ? playback.moveIndex : undefined}
+              playbackMoves={screen === "playback" ? solveResult?.moves : undefined}
+              playbackSpeed={screen === "playback" ? playback.speed : 1}
               onStickerSelect={(selection) =>
                 setPendingSticker({
                   face: selection.face,
