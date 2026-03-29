@@ -27,6 +27,8 @@ const CubeViewport = lazy(async () => {
 
 export function App() {
   const [debugConsoleOpen, setDebugConsoleOpen] = useState(false);
+  const [workbenchOpen, setWorkbenchOpen] = useState(true);
+  const [projectInfoOpen, setProjectInfoOpen] = useState(false);
   const [pwaActionError, setPwaActionError] = useState<string | null>(null);
   const dimension = useAppStore((state) => state.dimension);
   const screen = useAppStore((state) => state.screen);
@@ -139,14 +141,104 @@ export function App() {
 
   return (
     <div className="app-shell">
+      <main className="stage-panel">
+        <section className="stage-panel__lead">
+          <div>
+            <p className="eyebrow">Cubism</p>
+            <h1>3D zuerst, alles andere bei Bedarf.</h1>
+            <p className="stage-panel__copy">
+              Der Viewport bleibt die Hauptbühne. Die 2D-Arbeitsfläche ist weiterhin da, aber nur noch als sekundäre Ebene.
+            </p>
+          </div>
+          <div className="stage-panel__lead-actions">
+            <span className="confidence-badge">{screenLabels[screen]}</span>
+            <button
+              type="button"
+              className="secondary-button"
+              onClick={() => setWorkbenchOpen((current) => !current)}
+            >
+              {workbenchOpen ? "2D-Fläche ausblenden" : "2D-Fläche einblenden"}
+            </button>
+          </div>
+        </section>
+
+        <section className="stage-panel__viewport">
+          <div className="stage-panel__header">
+            <div>
+              <p className="eyebrow">Viewport</p>
+              <h2>
+                {dimension}x{dimension} {screen === "playback" && activeMove ? `· ${formatMove(activeMove)}` : ""}
+              </h2>
+            </div>
+            <div className="status-stack">
+              <span className="confidence-badge">Solve: {solveStatus}</span>
+              {solveError ? <span className="inline-error inline-error--compact">{solveError}</span> : null}
+              <button
+                type="button"
+                className="secondary-button debug-console-toggle"
+                aria-expanded={debugConsoleOpen}
+                aria-controls="debug-console"
+                onClick={() => setDebugConsoleOpen(true)}
+              >
+                Debug-Konsole
+              </button>
+            </div>
+          </div>
+
+          <Suspense fallback={<div className="cube-viewport cube-viewport--loading">3D-Viewport lädt …</div>}>
+            <CubeViewport state={viewportState} activeMove={activeMove} />
+          </Suspense>
+        </section>
+      </main>
+
       <aside className="side-panel">
-        <header className="hero-panel">
-          <p className="eyebrow">Cubism</p>
-          <h1>Lokaler Cube-Solver mit visuellem Lösungsweg</h1>
+        <header className="hero-panel hero-panel--compact">
+          <div>
+            <p className="eyebrow">Workflow</p>
+            <h2>Steuerung und 2D-Fläche</h2>
+          </div>
           <p className="hero-panel__copy">
-            Primär für `3x3`, vollständig client-seitig, als PWA installierbar und offline nutzbar.
+            Die Bedienfläche bleibt erreichbar, nimmt aber nicht mehr permanent die gleiche Aufmerksamkeit wie der Viewport ein.
           </p>
         </header>
+
+        <nav className="step-nav">
+          {(["capture", "review", "solve", "playback"] as AppScreen[]).map((step) => (
+            <div key={step} className={`step-nav__item${screen === step ? " step-nav__item--active" : ""}`}>
+              <span>{screenLabels[step]}</span>
+            </div>
+          ))}
+        </nav>
+
+        <section className="panel-card panel-card--compact workbench-card">
+          <div className="panel-card__header">
+            <div>
+              <p className="eyebrow">2D</p>
+              <h3>Arbeitsfläche</h3>
+            </div>
+            <button
+              type="button"
+              className="secondary-button"
+              aria-expanded={workbenchOpen}
+              onClick={() => setWorkbenchOpen((current) => !current)}
+            >
+              {workbenchOpen ? "Einklappen" : "Öffnen"}
+            </button>
+          </div>
+
+          {workbenchOpen ? (
+            <section className="screen-slot">
+              {screen === "capture" ? <CaptureScreen /> : null}
+              {screen === "review" ? <ReviewScreen /> : null}
+              {screen === "solve" ? <SolveScreen /> : null}
+              {screen === "playback" ? <PlaybackScreen /> : null}
+            </section>
+          ) : (
+            <p className="panel-card__meta">
+              Aktiver Schritt: {screenLabels[screen]}. Öffne die 2D-Arbeitsfläche, wenn du Eingaben, Review oder Playback-Details brauchst.
+            </p>
+          )}
+        </section>
 
         {pwaState.isOffline ? (
           <div className="inline-info" data-testid="offline-banner">
@@ -196,108 +288,81 @@ export function App() {
 
         {pwaActionError ? <p className="inline-error">{pwaActionError}</p> : null}
 
-        <nav className="step-nav">
-          {(["capture", "review", "solve", "playback"] as AppScreen[]).map((step) => (
-            <div key={step} className={`step-nav__item${screen === step ? " step-nav__item--active" : ""}`}>
-              <span>{screenLabels[step]}</span>
-            </div>
-          ))}
-        </nav>
-
         <section className="panel-card panel-card--compact app-meta-card">
           <div className="panel-card__header">
             <div>
               <p className="eyebrow">Projekt</p>
               <h3>Build-Info</h3>
             </div>
-            <span className="confidence-badge">v{appMetadata.version}</span>
-          </div>
-
-          <div className="app-meta-card__links">
-            {appMetadata.repositoryUrl ? (
-              <a
-                className="app-meta-card__link"
-                href={appMetadata.repositoryUrl}
-                target="_blank"
-                rel="noreferrer"
-              >
-                GitHub-Repository
-              </a>
-            ) : (
-              <span className="panel-card__meta">Kein Repository-Link in den Build-Metadaten hinterlegt.</span>
-            )}
-          </div>
-
-          <div className="app-meta-card__groups">
-            <section className="app-meta-card__group">
-              <div className="app-meta-card__group-header">
-                <strong>Dependencies</strong>
-                <span>{appMetadata.dependencies.length}</span>
-              </div>
-              <ul className="app-meta-card__list">
-                {appMetadata.dependencies.map((dependency) => (
-                  <li key={dependency.name}>
-                    <span>{dependency.name}</span>
-                    <code>{dependency.version}</code>
-                  </li>
-                ))}
-              </ul>
-            </section>
-
-            <section className="app-meta-card__group">
-              <div className="app-meta-card__group-header">
-                <strong>Dev-Dependencies</strong>
-                <span>{appMetadata.devDependencies.length}</span>
-              </div>
-              <ul className="app-meta-card__list">
-                {appMetadata.devDependencies.map((dependency) => (
-                  <li key={dependency.name}>
-                    <span>{dependency.name}</span>
-                    <code>{dependency.version}</code>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          </div>
-        </section>
-
-        <section className="screen-slot">
-          {screen === "capture" ? <CaptureScreen /> : null}
-          {screen === "review" ? <ReviewScreen /> : null}
-          {screen === "solve" ? <SolveScreen /> : null}
-          {screen === "playback" ? <PlaybackScreen /> : null}
-        </section>
-      </aside>
-
-      <main className="stage-panel">
-        <section className="stage-panel__viewport">
-          <div className="stage-panel__header">
-            <div>
-              <p className="eyebrow">Viewport</p>
-              <h2>
-                {dimension}x{dimension} {screen === "playback" && activeMove ? `· ${formatMove(activeMove)}` : ""}
-              </h2>
-            </div>
-            <div className="status-stack">
-              <span className="confidence-badge">Solve: {solveStatus}</span>
-              {solveError ? <span className="inline-error inline-error--compact">{solveError}</span> : null}
+            <div className="panel-card__actions">
+              <span className="confidence-badge">v{appMetadata.version}</span>
               <button
                 type="button"
-                className="secondary-button debug-console-toggle"
-                aria-expanded={debugConsoleOpen}
-                aria-controls="debug-console"
-                onClick={() => setDebugConsoleOpen(true)}
+                className="secondary-button"
+                aria-expanded={projectInfoOpen}
+                onClick={() => setProjectInfoOpen((current) => !current)}
               >
-                Debug-Konsole
+                {projectInfoOpen ? "Weniger" : "Mehr"}
               </button>
             </div>
           </div>
 
-          <Suspense fallback={<div className="cube-viewport cube-viewport--loading">3D-Viewport lädt …</div>}>
-            <CubeViewport state={viewportState} activeMove={activeMove} />
-          </Suspense>
+          {projectInfoOpen ? (
+            <>
+              <div className="app-meta-card__links">
+                {appMetadata.repositoryUrl ? (
+                  <a
+                    className="app-meta-card__link"
+                    href={appMetadata.repositoryUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    GitHub-Repository
+                  </a>
+                ) : (
+                  <span className="panel-card__meta">Kein Repository-Link in den Build-Metadaten hinterlegt.</span>
+                )}
+              </div>
+
+              <div className="app-meta-card__groups">
+                <section className="app-meta-card__group">
+                  <div className="app-meta-card__group-header">
+                    <strong>Dependencies</strong>
+                    <span>{appMetadata.dependencies.length}</span>
+                  </div>
+                  <ul className="app-meta-card__list">
+                    {appMetadata.dependencies.map((dependency) => (
+                      <li key={dependency.name}>
+                        <span>{dependency.name}</span>
+                        <code>{dependency.version}</code>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+
+                <section className="app-meta-card__group">
+                  <div className="app-meta-card__group-header">
+                    <strong>Dev-Dependencies</strong>
+                    <span>{appMetadata.devDependencies.length}</span>
+                  </div>
+                  <ul className="app-meta-card__list">
+                    {appMetadata.devDependencies.map((dependency) => (
+                      <li key={dependency.name}>
+                        <span>{dependency.name}</span>
+                        <code>{dependency.version}</code>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              </div>
+            </>
+          ) : (
+            <p className="panel-card__meta">
+              Version und Paketlisten bleiben verfügbar, treten aber standardmäßig hinter den eigentlichen Solve-Flow zurück.
+            </p>
+          )}
         </section>
-      </main>
+      </aside>
 
       {debugConsoleOpen ? (
         <div className="debug-console-layer" role="presentation">
