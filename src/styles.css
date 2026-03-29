@@ -118,6 +118,11 @@ button {
   gap: 16px;
 }
 
+.panel-card--compact {
+  padding: 16px;
+  gap: 12px;
+}
+
 .panel-card__header,
 .face-card__header,
 .stage-panel__header {
@@ -282,7 +287,8 @@ button {
 }
 
 .inline-error,
-.success-text {
+.success-text,
+.inline-info {
   margin: 0;
   border-radius: 16px;
   padding: 12px 14px;
@@ -301,6 +307,11 @@ button {
 .success-text {
   background: rgba(78, 127, 90, 0.18);
   color: #b5efc4;
+}
+
+.inline-info {
+  background: rgba(56, 109, 213, 0.16);
+  color: #c2d8ff;
 }
 
 .message-list,

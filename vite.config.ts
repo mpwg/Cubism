@@ -44,7 +44,7 @@ export default defineConfig({
       injectManifest: {
         globPatterns: ["**/*.{js,css,html,svg,png,webp,woff2}"]
       },
-      registerType: "autoUpdate",
+      registerType: "prompt",
       includeAssets: ["favicon.svg", "mask-icon.svg"],
       manifest: {
         name: "Cubism",

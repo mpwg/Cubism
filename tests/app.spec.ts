@@ -23,3 +23,20 @@ test("deckt den Kernfluss von Demo bis Playback ab", async ({ page }) => {
   await expect(page.getByText(/^1 \/ \d+$/)).toBeVisible();
   await expect(page.locator(".move-list__item--active")).toHaveCount(1);
 });
+
+test("bleibt nach erstem Laden offline im Kernfluss nutzbar", async ({ page }) => {
+  await page.goto("/");
+  await page.waitForFunction(async () => {
+    const registration = await navigator.serviceWorker?.getRegistration();
+    return Boolean(registration);
+  });
+
+  await page.context().setOffline(true);
+  await expect(page.getByTestId("offline-banner")).toBeVisible();
+
+  await page.getByRole("button", { name: /Demo laden/i }).click();
+  await page.getByRole("button", { name: /Zustand prüfen/i }).click();
+  await page.getByRole("button", { name: /Lösung berechnen/i }).click();
+
+  await expect(page.getByRole("heading", { name: /Lösungsweg abspielen/i })).toBeVisible();
+});
