@@ -1,9 +1,11 @@
 import { startTransition, useEffect, useRef, useState } from "react";
 import { FaceGrid } from "@/features/shared/FaceGrid";
 import { demoScrambleLabel } from "@/domain/cube/demo";
-import { faceDisplayName, faceOrder, supportedDimensions, type Face } from "@/domain/cube/types";
+import { CubeColor, faceDisplayName, faceOrder, supportedDimensions, type Face } from "@/domain/cube/types";
 import { scanFaceWithWorker } from "@/lib/workers/capture-client";
 import { useAppStore } from "@/app/store";
+
+const recommendedPhotoFaces: readonly Face[] = ["U", "R", "F"];
 
 async function createBitmapFromFile(file: File): Promise<ImageBitmap> {
   return createImageBitmap(file);
@@ -21,6 +23,9 @@ export function CaptureScreen() {
   const [busyFace, setBusyFace] = useState<Face | null>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const recommendedCapturedCount = recommendedPhotoFaces.filter((face) =>
+    captureSession.faces[face]?.stickers.some((sticker) => sticker.color !== CubeColor.Unknown)
+  ).length;
 
   useEffect(() => {
     if (!videoRef.current || !stream) {
@@ -119,7 +124,10 @@ export function CaptureScreen() {
             <p className="eyebrow">Capture</p>
             <h2>Würfel erfassen</h2>
           </div>
-          <p className="panel-card__meta">Fotografiere nacheinander die sechs Seiten oder starte mit einem Demo-Zustand.</p>
+          <p className="panel-card__meta">
+            Für den Einstieg genügen meist drei benachbarte Seiten (`U`, `R`, `F`). Den restlichen Zustand ergänzt du danach im Review-
+            oder Edit-Modus.
+          </p>
         </div>
 
         <div className="dimension-switch">
@@ -139,7 +147,9 @@ export function CaptureScreen() {
           <button type="button" className="primary-button" onClick={() => startTransition(() => loadDemo(dimension))}>
             Demo laden
           </button>
-          <p className="action-row__hint">Demo-Scramble: {demoScrambleLabel()}</p>
+          <p className="action-row__hint">
+            Mindest-Erfassung: {recommendedCapturedCount}/3 Seiten · Demo-Scramble: {demoScrambleLabel()}
+          </p>
         </div>
 
         {captureError ? <p className="inline-error">{captureError}</p> : null}
@@ -155,7 +165,10 @@ export function CaptureScreen() {
                   <p className="eyebrow">{face}</p>
                   <h3>{faceDisplayName[face]}</h3>
                 </div>
-                <span className="confidence-badge">{Math.round(capture.confidence * 100)}%</span>
+                <div className="face-card__header-meta">
+                  {recommendedPhotoFaces.includes(face) ? <span className="confidence-badge">empfohlen</span> : null}
+                  <span className="confidence-badge">{Math.round(capture.confidence * 100)}%</span>
+                </div>
               </div>
 
               <FaceGrid capture={capture} />
@@ -213,7 +226,7 @@ export function CaptureScreen() {
       ) : null}
 
       <div className="action-row action-row--spread">
-        <p className="action-row__hint">Nach der Erfassung lassen sich alle Sticker manuell korrigieren.</p>
+        <p className="action-row__hint">Nach drei Fotos kannst du weitergehen. Fehlende Sticker ergänzt du anschließend im Review.</p>
         <button type="button" className="primary-button" onClick={() => setScreen("review")}>
           Weiter zur Prüfung
         </button>
