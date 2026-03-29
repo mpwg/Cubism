@@ -1,6 +1,7 @@
 import { useDeferredValue, useEffect } from "react";
 import { formatMove } from "@/domain/cube/move";
 import { useAppStore } from "@/app/store";
+import { describeMove, getPhaseBounds, getPhaseTitle, getPlaybackMove } from "@/features/playback/playback-meta";
 
 export function PlaybackScreen() {
   const solveResult = useAppStore((state) => state.solveResult);
@@ -37,6 +38,20 @@ export function PlaybackScreen() {
     );
   }
 
+  const activePhase = solveResult.phases[playback.phaseIndex] ?? solveResult.phases[0];
+  const activePhaseBounds = getPhaseBounds(solveResult, playback.phaseIndex);
+  const currentMove = getPlaybackMove(solveResult, playback.moveIndex);
+  const currentMoveMeta = currentMove ? describeMove(currentMove) : null;
+  const atStart = playback.moveIndex === 0;
+  const atEnd = playback.moveIndex === solveResult.moves.length;
+  const canJumpToPreviousPhase = playback.phaseIndex > 0;
+  const canJumpToNextPhase = playback.phaseIndex < solveResult.phases.length - 1;
+
+  function stopAndRun(action: () => void) {
+    setPlaybackPlaying(false);
+    action();
+  }
+
   return (
     <div className="panel-stack">
       <div className="panel-card">
@@ -48,19 +63,63 @@ export function PlaybackScreen() {
           <p className="panel-card__meta">{solveResult.moves.length} Züge</p>
         </div>
 
+        <div className="playback-status">
+          <div className="playback-status__phase">
+            <p className="eyebrow">Aktive Phase</p>
+            <h3>{getPhaseTitle(activePhase.phase)}</h3>
+            <p className="panel-card__meta">
+              Schritte {activePhaseBounds.startMoveIndex} bis {activePhaseBounds.endMoveIndex}
+              {activePhaseBounds.moveCount === 0 ? " · ohne eigene Züge" : ` · ${activePhaseBounds.moveCount} Zug${activePhaseBounds.moveCount === 1 ? "" : "e"}`}
+            </p>
+            <p className="playback-status__text">{activePhase.diagnostics[0]}</p>
+          </div>
+
+          <div className="playback-status__move">
+            <p className="eyebrow">Aktueller Zug</p>
+            {currentMoveMeta ? (
+              <>
+                <h3>{currentMoveMeta.notation}</h3>
+                <div className="playback-status__badges">
+                  <span className="confidence-badge">Seite: {currentMoveMeta.face}</span>
+                  <span className="confidence-badge">Layer: {currentMoveMeta.layer}</span>
+                  <span className="confidence-badge">Drehung: {currentMoveMeta.rotation}</span>
+                </div>
+              </>
+            ) : (
+              <>
+                <h3>Startzustand</h3>
+                <p className="playback-status__text">Noch kein Zug ausgeführt. Du kannst direkt in eine Phase springen oder den Solve abspielen.</p>
+              </>
+            )}
+          </div>
+        </div>
+
         <div className="action-row">
-          <button type="button" className="secondary-button" onClick={() => stepPlayback(-1)}>
+          <button type="button" className="secondary-button" onClick={() => stopAndRun(() => setPlaybackIndex(0))} disabled={atStart}>
+            An den Start
+          </button>
+          <button type="button" className="secondary-button" onClick={() => stopAndRun(() => jumpToPhase(playback.phaseIndex - 1))} disabled={!canJumpToPreviousPhase}>
+            Phase zurück
+          </button>
+          <button type="button" className="secondary-button" onClick={() => stopAndRun(() => stepPlayback(-1))} disabled={atStart}>
             Schritt zurück
           </button>
           <button
             type="button"
             className="primary-button"
+            disabled={atEnd && !playback.playing}
             onClick={() => setPlaybackPlaying(!playback.playing)}
           >
             {playback.playing ? "Pause" : "Play"}
           </button>
-          <button type="button" className="secondary-button" onClick={() => stepPlayback(1)}>
+          <button type="button" className="secondary-button" onClick={() => stopAndRun(() => stepPlayback(1))} disabled={atEnd}>
             Schritt vor
+          </button>
+          <button type="button" className="secondary-button" onClick={() => stopAndRun(() => jumpToPhase(playback.phaseIndex + 1))} disabled={!canJumpToNextPhase}>
+            Phase weiter
+          </button>
+          <button type="button" className="secondary-button" onClick={() => stopAndRun(() => setPlaybackIndex(solveResult.moves.length))} disabled={atEnd}>
+            Ans Ende
           </button>
         </div>
 
@@ -71,7 +130,7 @@ export function PlaybackScreen() {
             max={solveResult.moves.length}
             step={1}
             value={playback.moveIndex}
-            onChange={(event) => setPlaybackIndex(Number(event.target.value))}
+            onChange={(event) => stopAndRun(() => setPlaybackIndex(Number(event.target.value)))}
           />
           <span>
             {playback.moveIndex} / {solveResult.moves.length}
@@ -100,17 +159,26 @@ export function PlaybackScreen() {
           </div>
         </div>
         <div className="phase-list">
-          {solveResult.phases.map((phase, index) => (
-            <button
-              key={`${phase.phase}-${index}`}
-              type="button"
-              className={`phase-item${playback.phaseIndex === index ? " phase-item--active" : ""}`}
-              onClick={() => jumpToPhase(index)}
-            >
-              <span>{phase.phase}</span>
-              <small>{phase.diagnostics[0]}</small>
-            </button>
-          ))}
+          {solveResult.phases.map((phase, index) => {
+            const bounds = getPhaseBounds(solveResult, index);
+
+            return (
+              <button
+                key={`${phase.phase}-${index}`}
+                type="button"
+                className={`phase-item${playback.phaseIndex === index ? " phase-item--active" : ""}`}
+                aria-label={getPhaseTitle(phase.phase)}
+                aria-pressed={playback.phaseIndex === index}
+                onClick={() => stopAndRun(() => jumpToPhase(index))}
+              >
+                <span>{getPhaseTitle(phase.phase)}</span>
+                <small>
+                  Schritte {bounds.startMoveIndex} bis {bounds.endMoveIndex}
+                </small>
+                <small>{phase.diagnostics[0]}</small>
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -122,11 +190,27 @@ export function PlaybackScreen() {
           </div>
         </div>
         <ol className="move-list">
-          {solveResult.moves.map((move, index) => (
-            <li key={`${formatMove(move)}-${index}`} className={deferredMoveIndex === index + 1 ? "move-list__item move-list__item--active" : "move-list__item"}>
-              {index + 1}. {formatMove(move)}
-            </li>
-          ))}
+          {solveResult.moves.map((move, index) => {
+            const moveMeta = describeMove(move);
+            const isActive = deferredMoveIndex === index + 1;
+
+            return (
+              <li key={`${formatMove(move)}-${index}`} className={`move-list__item${isActive ? " move-list__item--active" : ""}`}>
+                <button
+                  type="button"
+                  className={`move-list__button${isActive ? " move-list__button--active" : ""}`}
+                  aria-label={`${index + 1}. ${moveMeta.notation}`}
+                  aria-current={isActive ? "step" : undefined}
+                  onClick={() => stopAndRun(() => setPlaybackIndex(index + 1))}
+                >
+                  <span>{index + 1}. {moveMeta.notation}</span>
+                  <small>
+                    {moveMeta.face} · {moveMeta.layer}
+                  </small>
+                </button>
+              </li>
+            );
+          })}
         </ol>
       </div>
     </div>

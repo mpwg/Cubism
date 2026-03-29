@@ -170,8 +170,15 @@ export const useAppStore = create<AppStore>()(
         return;
       }
 
-      const target = phaseIndex === 0 ? 0 : result.phaseBreaks[phaseIndex - 1];
-      get().setPlaybackIndex(target);
+      const boundedPhaseIndex = Math.max(0, Math.min(phaseIndex, result.phases.length - 1));
+      const target = boundedPhaseIndex === 0 ? 0 : result.phaseBreaks[boundedPhaseIndex - 1];
+      set({
+        playback: {
+          ...get().playback,
+          moveIndex: target,
+          phaseIndex: boundedPhaseIndex
+        }
+      });
     },
     loadDemo(dimension = 3) {
       const captureSession = createDemoCaptureSession(dimension);
