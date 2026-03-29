@@ -1,6 +1,7 @@
 import { Suspense, lazy, startTransition, useEffect, useState } from "react";
 import type { AppScreen } from "@/app/types";
 import { useAppStore } from "@/app/store";
+import { appMetadata } from "@/app/app-metadata";
 import { createSolvedCubeState } from "@/domain/cube/cube-state";
 import { formatMove } from "@/domain/cube/move";
 import { FaceGrid } from "@/features/shared/FaceGrid";
@@ -181,6 +182,63 @@ export function App() {
             </div>
           ))}
         </nav>
+
+        <section className="panel-card panel-card--compact app-meta-card">
+          <div className="panel-card__header">
+            <div>
+              <p className="eyebrow">Projekt</p>
+              <h3>Build-Info</h3>
+            </div>
+            <span className="confidence-badge">v{appMetadata.version}</span>
+          </div>
+
+          <div className="app-meta-card__links">
+            {appMetadata.repositoryUrl ? (
+              <a
+                className="app-meta-card__link"
+                href={appMetadata.repositoryUrl}
+                target="_blank"
+                rel="noreferrer"
+              >
+                GitHub-Repository
+              </a>
+            ) : (
+              <span className="panel-card__meta">Kein Repository-Link in den Build-Metadaten hinterlegt.</span>
+            )}
+          </div>
+
+          <div className="app-meta-card__groups">
+            <section className="app-meta-card__group">
+              <div className="app-meta-card__group-header">
+                <strong>Dependencies</strong>
+                <span>{appMetadata.dependencies.length}</span>
+              </div>
+              <ul className="app-meta-card__list">
+                {appMetadata.dependencies.map((dependency) => (
+                  <li key={dependency.name}>
+                    <span>{dependency.name}</span>
+                    <code>{dependency.version}</code>
+                  </li>
+                ))}
+              </ul>
+            </section>
+
+            <section className="app-meta-card__group">
+              <div className="app-meta-card__group-header">
+                <strong>Dev-Dependencies</strong>
+                <span>{appMetadata.devDependencies.length}</span>
+              </div>
+              <ul className="app-meta-card__list">
+                {appMetadata.devDependencies.map((dependency) => (
+                  <li key={dependency.name}>
+                    <span>{dependency.name}</span>
+                    <code>{dependency.version}</code>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          </div>
+        </section>
 
         <section className="screen-slot">
           {screen === "capture" ? <CaptureScreen /> : null}
