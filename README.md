@@ -132,6 +132,7 @@ Die fachliche und technische Planung liegt bewusst im Repository und nicht in KÃ
 - [`docs/anforderungen.md`](./docs/anforderungen.md)
 - [`docs/architektur.md`](./docs/architektur.md)
 - [`docs/deployment.md`](./docs/deployment.md)
+- [`docs/teststrategie.md`](./docs/teststrategie.md)
 - [`docs/umsetzungsplan.md`](./docs/umsetzungsplan.md)
 
 ## Deployment
