@@ -59,7 +59,17 @@ describe("snapshot persistence", () => {
         screen: "playback",
         captureSession,
         cubeState: solveResult.initial,
-        validationResult: { ok: true, errors: [], normalizedState: solveResult.initial, reduced: true },
+        validationResult: {
+          ok: true,
+          status: "ok",
+          errors: [],
+          groups: [],
+          highlightedFaces: [],
+          highlightedStickers: [],
+          nextAction: "Der Zustand ist belastbar validiert und kann in den Solve-Schritt übernommen werden.",
+          normalizedState: solveResult.initial,
+          reduced: true
+        },
         solveStatus: "done",
         solveResult,
         solveError: null,

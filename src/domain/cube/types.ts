@@ -118,13 +118,26 @@ export interface CaptureSession {
 export interface ValidationError {
   readonly code: string;
   readonly message: string;
+  readonly category: "incomplete" | "inconsistent" | "unsolvable";
   readonly face?: Face;
   readonly index?: number;
 }
 
+export interface ValidationGroup {
+  readonly category: ValidationError["category"];
+  readonly title: string;
+  readonly description: string;
+  readonly count: number;
+}
+
 export interface ValidationResult {
   readonly ok: boolean;
+  readonly status: "ok" | ValidationError["category"];
   readonly errors: ValidationError[];
+  readonly groups: ValidationGroup[];
+  readonly highlightedFaces: Face[];
+  readonly highlightedStickers: Array<{ face: Face; index: number }>;
+  readonly nextAction: string;
   readonly normalizedState?: CubeState;
   readonly reduced?: boolean;
 }

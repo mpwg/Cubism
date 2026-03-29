@@ -58,7 +58,16 @@ describe("app store", () => {
     const result = createSolveResult();
 
     useAppStore.getState().acceptSolveResult(result);
-    useAppStore.getState().setValidationResult({ ok: true, errors: [], reduced: true });
+    useAppStore.getState().setValidationResult({
+      ok: true,
+      status: "ok",
+      errors: [],
+      groups: [],
+      highlightedFaces: [],
+      highlightedStickers: [],
+      nextAction: "Der Zustand ist belastbar validiert und kann in den Solve-Schritt übernommen werden.",
+      reduced: true
+    });
     useAppStore.getState().setSolveError("Vorheriger Fehler");
     useAppStore.getState().setSelectedCorrectionColor(CubeColor.Blue);
 
