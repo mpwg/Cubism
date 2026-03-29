@@ -26,6 +26,7 @@ const CubeViewport = lazy(async () => {
 });
 
 export function App() {
+  const [debugConsoleOpen, setDebugConsoleOpen] = useState(false);
   const [pwaActionError, setPwaActionError] = useState<string | null>(null);
   const dimension = useAppStore((state) => state.dimension);
   const screen = useAppStore((state) => state.screen);
@@ -96,6 +97,26 @@ export function App() {
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (!debugConsoleOpen) {
+      return;
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setDebugConsoleOpen(false);
+      }
+    }
+
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [debugConsoleOpen]);
 
   const viewportState = screen === "playback" && playbackStates[playback.moveIndex] ? playbackStates[playback.moveIndex] : cubeState ?? createSolvedCubeState(dimension);
   const activeMove = solveResult && playback.moveIndex > 0 ? solveResult.moves[playback.moveIndex - 1] : undefined;
@@ -260,6 +281,15 @@ export function App() {
             <div className="status-stack">
               <span className="confidence-badge">Solve: {solveStatus}</span>
               {solveError ? <span className="inline-error inline-error--compact">{solveError}</span> : null}
+              <button
+                type="button"
+                className="secondary-button debug-console-toggle"
+                aria-expanded={debugConsoleOpen}
+                aria-controls="debug-console"
+                onClick={() => setDebugConsoleOpen(true)}
+              >
+                Debug-Konsole
+              </button>
             </div>
           </div>
 
@@ -267,58 +297,91 @@ export function App() {
             <CubeViewport state={viewportState} activeMove={activeMove} />
           </Suspense>
         </section>
+      </main>
 
-        <section className="stage-panel__debug">
-          <div className="panel-card">
-            <div className="panel-card__header">
+      {debugConsoleOpen ? (
+        <div className="debug-console-layer" role="presentation">
+          <button
+            type="button"
+            className="debug-console-backdrop"
+            aria-label="Debug-Konsole schließen"
+            onClick={() => setDebugConsoleOpen(false)}
+          />
+
+          <section
+            id="debug-console"
+            className="debug-console"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="debug-console-title"
+          >
+            <div className="debug-console__header">
               <div>
-                <p className="eyebrow">Netz</p>
-                <h3>Aktueller Zustand</h3>
+                <p className="eyebrow">Debug</p>
+                <h2 id="debug-console-title">Technische Konsole</h2>
               </div>
+              <button
+                type="button"
+                className="secondary-button"
+                onClick={() => setDebugConsoleOpen(false)}
+              >
+                Schließen
+              </button>
             </div>
-            <div className="mini-net">
-              {faceOrder.map((face) => {
-                const capture = captureSession.faces[face];
-                if (!capture) {
-                  return null;
-                }
 
-                return (
-                  <article key={face} className="mini-net__face">
-                    <div className="mini-net__label">
-                      <span>{face}</span>
-                      <small>{faceDisplayName[face]}</small>
-                    </div>
-                    <FaceGrid capture={capture} />
-                  </article>
-                );
-              })}
-            </div>
-          </div>
+            <div className="debug-console__content">
+              <div className="panel-card">
+                <div className="panel-card__header">
+                  <div>
+                    <p className="eyebrow">Netz</p>
+                    <h3>Aktueller Zustand</h3>
+                  </div>
+                </div>
+                <div className="mini-net">
+                  {faceOrder.map((face) => {
+                    const capture = captureSession.faces[face];
+                    if (!capture) {
+                      return null;
+                    }
 
-          {validationResult ? (
-            <div className="panel-card">
-              <div className="panel-card__header">
-                <div>
-                  <p className="eyebrow">Validierung</p>
-                  <h3>{validationResult.ok ? "Konsistent" : "Auffälligkeiten"}</h3>
+                    return (
+                      <article key={face} className="mini-net__face">
+                        <div className="mini-net__label">
+                          <span>{face}</span>
+                          <small>{faceDisplayName[face]}</small>
+                        </div>
+                        <FaceGrid capture={capture} />
+                      </article>
+                    );
+                  })}
                 </div>
               </div>
-              {validationResult.ok ? (
-                <p className="success-text">Der aktuelle Zustand ist solverfähig.</p>
-              ) : (
-                <ul className="message-list">
-                  {validationResult.errors.map((validationError) => (
-                    <li key={`${validationError.code}-${validationError.index ?? validationError.face ?? "global"}`}>
-                      {validationError.message}
-                    </li>
-                  ))}
-                </ul>
-              )}
+
+              {validationResult ? (
+                <div className="panel-card">
+                  <div className="panel-card__header">
+                    <div>
+                      <p className="eyebrow">Validierung</p>
+                      <h3>{validationResult.ok ? "Konsistent" : "Auffälligkeiten"}</h3>
+                    </div>
+                  </div>
+                  {validationResult.ok ? (
+                    <p className="success-text">Der aktuelle Zustand ist solverfähig.</p>
+                  ) : (
+                    <ul className="message-list">
+                      {validationResult.errors.map((validationError) => (
+                        <li key={`${validationError.code}-${validationError.index ?? validationError.face ?? "global"}`}>
+                          {validationError.message}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              ) : null}
             </div>
-          ) : null}
-        </section>
-      </main>
+          </section>
+        </div>
+      ) : null}
     </div>
   );
 }

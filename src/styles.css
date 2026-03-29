@@ -297,13 +297,13 @@ button {
 
 .stage-panel {
   display: grid;
-  grid-template-rows: minmax(0, 1fr) auto;
+  grid-template-rows: minmax(0, 1fr);
   padding: 22px;
   gap: 18px;
 }
 
 .stage-panel__viewport,
-.stage-panel__debug {
+.debug-console__content {
   display: grid;
   gap: 18px;
 }
@@ -330,6 +330,59 @@ button {
   display: grid;
   gap: 8px;
   justify-items: end;
+}
+
+.debug-console-toggle {
+  width: 100%;
+}
+
+.debug-console-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: grid;
+  align-items: end;
+}
+
+.debug-console-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(6, 6, 5, 0.58);
+  backdrop-filter: blur(10px);
+}
+
+.debug-console {
+  position: relative;
+  display: grid;
+  gap: 18px;
+  width: min(100%, 1120px);
+  max-height: min(78vh, 920px);
+  margin: 0 auto;
+  padding: 22px;
+  border-radius: 28px 28px 0 0;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 0;
+  background:
+    radial-gradient(circle at top left, rgba(56, 109, 213, 0.13), transparent 30%),
+    rgba(12, 12, 10, 0.96);
+  box-shadow: 0 -18px 56px rgba(0, 0, 0, 0.38);
+}
+
+.debug-console__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: start;
+}
+
+.debug-console__header h2 {
+  margin: 0;
+}
+
+.debug-console__content {
+  overflow: auto;
+  padding-right: 4px;
 }
 
 .mini-net {
@@ -463,5 +516,16 @@ button {
 
   .step-nav {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .debug-console {
+    width: 100%;
+    max-height: 82vh;
+    padding: 18px;
+  }
+
+  .debug-console__header {
+    align-items: stretch;
+    flex-direction: column;
   }
 }
