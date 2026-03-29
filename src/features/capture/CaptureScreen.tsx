@@ -119,7 +119,7 @@ export function CaptureScreen() {
             <p className="eyebrow">Capture</p>
             <h2>Würfel erfassen</h2>
           </div>
-          <p className="panel-card__meta">`3x3` ist der Primärpfad, `4x4` bleibt sichtbar als Ausbaustufe.</p>
+          <p className="panel-card__meta">Fotografiere nacheinander die sechs Seiten oder starte mit einem Demo-Zustand.</p>
         </div>
 
         <div className="dimension-switch">

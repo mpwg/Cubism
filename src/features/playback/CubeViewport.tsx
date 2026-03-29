@@ -1,9 +1,14 @@
 import { useRef } from "react";
-import { Canvas, extend, useFrame, useThree, type ThreeElement } from "@react-three/fiber";
+import { Canvas, extend, useFrame, useThree, type ThreeElement, type ThreeEvent } from "@react-three/fiber";
 import { OrbitControls as ThreeOrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import { cubeColorHex, type CubeState, type Move, type RenderCubie } from "@/domain/cube/types";
+import {
+  faceRowColToStickerIndex,
+  getFaceNormal,
+  isPositionAffectedByMove,
+  worldToStickerAddress
+} from "@/domain/cube/coordinates";
+import { cubeColorHex, type CubeState, type Face, type Move, type RenderCubie } from "@/domain/cube/types";
 import { toRenderCubies } from "@/domain/cube/render";
-import { isPositionAffectedByMove } from "@/domain/cube/coordinates";
 
 extend({ OrbitControls: ThreeOrbitControls });
 
@@ -16,7 +21,11 @@ declare module "@react-three/fiber" {
 interface CubeViewportProps {
   readonly state: CubeState;
   readonly activeMove?: Move;
+  readonly editable?: boolean;
+  readonly onStickerSelect?: (selection: { face: Face; index: number; clientX: number; clientY: number }) => void;
 }
+
+const faceByMaterialIndex = ["R", "L", "U", "D", "F", "B"] as const;
 
 function CameraControls() {
   const controlsRef = useRef<ThreeOrbitControls | null>(null);
@@ -39,7 +48,19 @@ function CameraControls() {
   );
 }
 
-function Cubie({ cubie, dimension, activeMove }: { cubie: RenderCubie; dimension: number; activeMove?: Move }) {
+function Cubie({
+  cubie,
+  dimension,
+  activeMove,
+  editable = false,
+  onStickerSelect
+}: {
+  cubie: RenderCubie;
+  dimension: number;
+  activeMove?: Move;
+  editable?: boolean;
+  onStickerSelect?: (selection: { face: Face; index: number; clientX: number; clientY: number }) => void;
+}) {
   const highlight = activeMove ? isPositionAffectedByMove(dimension as 3 | 4, cubie.position, activeMove) : false;
   const base = highlight ? "#1f8dff" : "#171717";
   const faceMaterials = [
@@ -51,8 +72,37 @@ function Cubie({ cubie, dimension, activeMove }: { cubie: RenderCubie; dimension
     cubie.stickers.B !== undefined ? cubeColorHex[cubie.stickers.B] : base
   ];
 
+  function handleClick(event: ThreeEvent<MouseEvent>) {
+    if (!editable || !onStickerSelect) {
+      return;
+    }
+
+    const materialIndex = event.face?.materialIndex;
+    if (materialIndex === undefined) {
+      return;
+    }
+
+    const face = faceByMaterialIndex[materialIndex];
+    if (!face || cubie.stickers[face] === undefined) {
+      return;
+    }
+
+    const address = worldToStickerAddress(dimension as 3 | 4, cubie.position, getFaceNormal(face));
+    event.stopPropagation();
+    onStickerSelect({
+      face,
+      index: faceRowColToStickerIndex(dimension as 3 | 4, face, address.row, address.col) % (dimension * dimension),
+      clientX: event.nativeEvent.clientX,
+      clientY: event.nativeEvent.clientY
+    });
+  }
+
   return (
-    <mesh position={[cubie.position.x * 1.08, cubie.position.y * 1.08, cubie.position.z * 1.08]} scale={highlight ? 1.02 : 1}>
+    <mesh
+      position={[cubie.position.x * 1.08, cubie.position.y * 1.08, cubie.position.z * 1.08]}
+      scale={highlight ? 1.02 : 1}
+      onClick={handleClick}
+    >
       <boxGeometry args={[0.92, 0.92, 0.92]} />
       {faceMaterials.map((color, index) => (
         <meshStandardMaterial key={`${cubie.id}-${index}`} attach={`material-${index}`} color={color} metalness={0.08} roughness={0.42} />
@@ -61,7 +111,7 @@ function Cubie({ cubie, dimension, activeMove }: { cubie: RenderCubie; dimension
   );
 }
 
-export function CubeViewport({ state, activeMove }: CubeViewportProps) {
+export function CubeViewport({ state, activeMove, editable = false, onStickerSelect }: CubeViewportProps) {
   const cubies = toRenderCubies(state);
 
   return (
@@ -73,7 +123,14 @@ export function CubeViewport({ state, activeMove }: CubeViewportProps) {
         <directionalLight position={[-5, -7, -4]} intensity={0.55} color="#8ea6ff" />
         <group rotation={[0.55, -0.72, 0.08]}>
           {cubies.map((cubie) => (
-            <Cubie key={cubie.id} cubie={cubie} dimension={state.dimension} activeMove={activeMove} />
+            <Cubie
+              key={cubie.id}
+              cubie={cubie}
+              dimension={state.dimension}
+              activeMove={activeMove}
+              editable={editable}
+              onStickerSelect={onStickerSelect}
+            />
           ))}
         </group>
         <CameraControls />
