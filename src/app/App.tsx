@@ -9,6 +9,7 @@ import { CaptureScreen } from "@/features/capture/CaptureScreen";
 import { ReviewScreen } from "@/features/capture/ReviewScreen";
 import { SolveScreen } from "@/features/solve/SolveScreen";
 import { PlaybackScreen } from "@/features/playback/PlaybackScreen";
+import { describeMove, getPhaseTitle } from "@/features/playback/playback-meta";
 import {
   cubeColorHex,
   cubeColorLabels,
@@ -147,6 +148,8 @@ export function App() {
 
   const viewportState = screen === "playback" && playbackStates[playback.moveIndex] ? playbackStates[playback.moveIndex] : cubeState ?? createSolvedCubeState(dimension);
   const activeMove = solveResult && playback.moveIndex > 0 ? solveResult.moves[playback.moveIndex - 1] : undefined;
+  const activeMoveMeta = activeMove ? describeMove(activeMove) : null;
+  const activePhase = screen === "playback" && solveResult ? solveResult.phases[playback.phaseIndex] : null;
 
   async function handleInstall() {
     setPwaActionError(null);
@@ -253,6 +256,9 @@ export function App() {
           <div className="stage-showcase__footer">
             <div className="stage-showcase__hints">
               <span className="confidence-badge">{viewportEditMode ? "Sticker direkt anklicken" : "Orbit und Zoom aktiv"}</span>
+              {activePhase ? <span className="confidence-badge">Phase: {getPhaseTitle(activePhase.phase)}</span> : null}
+              {activeMoveMeta ? <span className="confidence-badge">Layer: {activeMoveMeta.layer}</span> : null}
+              {activeMoveMeta ? <span className="confidence-badge">Seite: {activeMoveMeta.face}</span> : null}
               {solveError ? <span className="inline-error inline-error--compact">{solveError}</span> : null}
               <button
                 type="button"
