@@ -86,4 +86,19 @@ describe("CaptureScreen", () => {
     });
     expect(screen.queryByTestId("camera-overlay")).not.toBeInTheDocument();
   });
+
+  it("öffnet den Kamera-Flow auch dann erneut, wenn bereits drei Seiten erfasst sind", async () => {
+    const solvedSession = createSolvedCaptureSession(3);
+    useAppStore.getState().mergeFaceCapture(solvedSession.faces.U!);
+    useAppStore.getState().mergeFaceCapture(solvedSession.faces.R!);
+    useAppStore.getState().mergeFaceCapture(solvedSession.faces.F!);
+
+    const user = userEvent.setup();
+    render(<CaptureScreen />);
+
+    await user.click(screen.getByRole("button", { name: "Cube fotografieren" }));
+
+    expect(await screen.findByTestId("camera-overlay")).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Oben scannen" })).toBeVisible();
+  });
 });

@@ -26,6 +26,7 @@ export function ReviewScreen() {
   const [busy, setBusy] = useState<"validate" | "reclassify" | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
+  const validationMeta = validationResult ? validationStatusMeta[validationResult.status] ?? validationStatusMeta.incomplete : null;
 
   const highlightedByFace = useMemo(() => {
     const lookup = new Map<string, Set<number>>();
@@ -150,8 +151,8 @@ export function ReviewScreen() {
 
         {validationResult ? (
           <div className="review-feedback">
-            <p className={validationStatusMeta[validationResult.status].className}>
-              <strong>{validationStatusMeta[validationResult.status].title}.</strong> {validationResult.nextAction}
+            <p className={validationMeta?.className ?? "inline-info"}>
+              <strong>{validationMeta?.title ?? "Status unbekannt"}.</strong> {validationResult.nextAction}
             </p>
 
             {validationResult.ok ? null : (

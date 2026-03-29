@@ -93,12 +93,7 @@ export function CaptureScreen() {
   }
 
   async function openCameraOverlay() {
-    const nextFace = nextGuidedFace;
-
-    if (!nextFace) {
-      startTransition(() => setScreen("review"));
-      return;
-    }
+    const nextFace = nextGuidedFace ?? guidedCameraFaces[0];
 
     setCaptureError(null);
     setCameraOverlayOpen(true);
@@ -266,7 +261,7 @@ export function CaptureScreen() {
           <p className="panel-card__meta">
             {nextGuidedFace
               ? `Nächste Zielseite: ${faceDisplayName[nextGuidedFace]}. Danach ergänzt du fehlende Sticker wie gewohnt im Review.`
-              : "Drei Seiten sind bereits vorhanden. Du kannst direkt zur Prüfung wechseln."}
+              : "Drei Seiten sind bereits vorhanden. Du kannst direkt zur Prüfung wechseln oder den Kamera-Flow erneut starten."}
           </p>
           <button type="button" className="secondary-button" onClick={() => setScreen("review")}>
             Weiter zur Prüfung
