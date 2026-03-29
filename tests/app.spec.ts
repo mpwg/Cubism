@@ -2,9 +2,10 @@ import { expect, test } from "@playwright/test";
 
 test("zeigt die Cubism-Startoberfläche", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: /3D zuerst, alles andere bei Bedarf/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /^Cubism$/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Würfel fotografieren/i })).toBeVisible();
   await expect(page.getByRole("button", { name: /Demo laden/i })).toBeVisible();
-  await expect(page.getByText(/Primärpfad/i)).toBeVisible();
+  await expect(page.getByRole("button", { name: /Edit-Modus/i })).toBeVisible();
 });
 
 test("deckt den Kernfluss von Demo bis Playback ab", async ({ page }) => {

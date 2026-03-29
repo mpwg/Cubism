@@ -9,7 +9,14 @@ import { CaptureScreen } from "@/features/capture/CaptureScreen";
 import { ReviewScreen } from "@/features/capture/ReviewScreen";
 import { SolveScreen } from "@/features/solve/SolveScreen";
 import { PlaybackScreen } from "@/features/playback/PlaybackScreen";
-import { faceDisplayName, faceOrder } from "@/domain/cube/types";
+import {
+  cubeColorHex,
+  cubeColorLabels,
+  cubeColorOrder,
+  faceDisplayName,
+  faceOrder,
+  type Face
+} from "@/domain/cube/types";
 import { loadAppSnapshot, saveAppSnapshot, serializeSnapshotInput } from "@/lib/persistence/snapshot";
 import { applyPwaUpdate, promptForInstall, usePwaState } from "@/pwa/state";
 
@@ -27,8 +34,10 @@ const CubeViewport = lazy(async () => {
 
 export function App() {
   const [debugConsoleOpen, setDebugConsoleOpen] = useState(false);
-  const [workbenchOpen, setWorkbenchOpen] = useState(true);
+  const [workbenchOpen, setWorkbenchOpen] = useState(false);
   const [projectInfoOpen, setProjectInfoOpen] = useState(false);
+  const [viewportEditMode, setViewportEditMode] = useState(false);
+  const [pendingSticker, setPendingSticker] = useState<{ face: Face; index: number } | null>(null);
   const [pwaActionError, setPwaActionError] = useState<string | null>(null);
   const dimension = useAppStore((state) => state.dimension);
   const screen = useAppStore((state) => state.screen);
@@ -40,6 +49,10 @@ export function App() {
   const solveStatus = useAppStore((state) => state.solveStatus);
   const solveError = useAppStore((state) => state.solveError);
   const validationResult = useAppStore((state) => state.validationResult);
+  const selectedCorrectionColor = useAppStore((state) => state.selectedCorrectionColor);
+  const setSelectedCorrectionColor = useAppStore((state) => state.setSelectedCorrectionColor);
+  const setCaptureStickerColor = useAppStore((state) => state.setCaptureStickerColor);
+  const setScreen = useAppStore((state) => state.setScreen);
   const hydrate = useAppStore((state) => state.hydrate);
   const pwaState = usePwaState();
 
@@ -120,6 +133,18 @@ export function App() {
     };
   }, [debugConsoleOpen]);
 
+  useEffect(() => {
+    if (!viewportEditMode) {
+      setPendingSticker(null);
+    }
+  }, [viewportEditMode]);
+
+  useEffect(() => {
+    if (screen !== "capture") {
+      setWorkbenchOpen(true);
+    }
+  }, [screen]);
+
   const viewportState = screen === "playback" && playbackStates[playback.moveIndex] ? playbackStates[playback.moveIndex] : cubeState ?? createSolvedCubeState(dimension);
   const activeMove = solveResult && playback.moveIndex > 0 ? solveResult.moves[playback.moveIndex - 1] : undefined;
 
@@ -139,39 +164,85 @@ export function App() {
     }
   }
 
+  function renderToolScreen() {
+    if (screen === "review") {
+      return <ReviewScreen />;
+    }
+
+    if (screen === "solve") {
+      return <SolveScreen />;
+    }
+
+    if (screen === "playback") {
+      return <PlaybackScreen />;
+    }
+
+    return (
+      <p className="panel-card__meta">
+        Review, Solve und Playback werden hier eingeblendet, sobald du nach dem Fotografieren weitergehst.
+      </p>
+    );
+  }
+
+  function applyViewportColor(face: Face, index: number, color: (typeof cubeColorOrder)[number]) {
+    setSelectedCorrectionColor(color);
+    setCaptureStickerColor(face, index, color);
+    setPendingSticker(null);
+  }
+
   return (
     <div className="app-shell">
-      <main className="stage-panel">
-        <section className="stage-panel__lead">
+      <main className="app-flow">
+        <section className="brand-hero">
           <div>
-            <p className="eyebrow">Cubism</p>
-            <h1>3D zuerst, alles andere bei Bedarf.</h1>
-            <p className="stage-panel__copy">
-              Der Viewport bleibt die Hauptbühne. Die 2D-Arbeitsfläche ist weiterhin da, aber nur noch als sekundäre Ebene.
+            <p className="eyebrow">Lokaler Cube-Solver</p>
+            <h1>Cubism</h1>
+            <p className="brand-hero__copy">
+              Das Modell steht zuerst. Danach folgt direkt das Fotografieren. Alles Weitere bleibt darunter erreichbar, ohne die Startoberfläche wieder in ein Werkzeugpanel zu verwandeln.
             </p>
           </div>
-          <div className="stage-panel__lead-actions">
-            <span className="confidence-badge">{screenLabels[screen]}</span>
-            <button
-              type="button"
-              className="secondary-button"
-              onClick={() => setWorkbenchOpen((current) => !current)}
-            >
-              {workbenchOpen ? "2D-Fläche ausblenden" : "2D-Fläche einblenden"}
-            </button>
+          <div className="brand-hero__status">
+            <span className="confidence-badge">Aktuell: {screenLabels[screen]}</span>
+            <span className="confidence-badge">Solve: {solveStatus}</span>
           </div>
         </section>
 
-        <section className="stage-panel__viewport">
-          <div className="stage-panel__header">
+        <section className="stage-showcase">
+          <div className="stage-showcase__header">
             <div>
-              <p className="eyebrow">Viewport</p>
-              <h2>
+              <p className="eyebrow">3D-Modell</p>
+              <h2 className="stage-showcase__title">
                 {dimension}x{dimension} {screen === "playback" && activeMove ? `· ${formatMove(activeMove)}` : ""}
               </h2>
+              <p className="stage-showcase__copy">
+                Drehen, zoomen und bei Bedarf direkt korrigieren. Der Edit-Modus öffnet die Farbauswahl unmittelbar auf Klick.
+              </p>
             </div>
-            <div className="status-stack">
-              <span className="confidence-badge">Solve: {solveStatus}</span>
+
+            <div className="stage-showcase__actions">
+              <button
+                type="button"
+                className={`secondary-button${viewportEditMode ? " secondary-button--active" : ""}`}
+                aria-pressed={viewportEditMode}
+                onClick={() => setViewportEditMode((current) => !current)}
+              >
+                {viewportEditMode ? "Edit-Modus aktiv" : "Edit-Modus"}
+              </button>
+            </div>
+          </div>
+
+          <Suspense fallback={<div className="cube-viewport cube-viewport--loading">3D-Viewport lädt …</div>}>
+            <CubeViewport
+              state={viewportState}
+              activeMove={activeMove}
+              editable={viewportEditMode}
+              onStickerSelect={(selection) => setPendingSticker(selection)}
+            />
+          </Suspense>
+
+          <div className="stage-showcase__footer">
+            <div className="stage-showcase__hints">
+              <span className="confidence-badge">{viewportEditMode ? "Sticker direkt anklicken" : "Orbit und Zoom aktiv"}</span>
               {solveError ? <span className="inline-error inline-error--compact">{solveError}</span> : null}
               <button
                 type="button"
@@ -183,186 +254,215 @@ export function App() {
                 Debug-Konsole
               </button>
             </div>
+
+            {pendingSticker ? (
+              <div className="viewport-palette" role="dialog" aria-label="Farbe für Sticker wählen">
+                <div className="viewport-palette__header">
+                  <div>
+                    <p className="eyebrow">Edit</p>
+                    <h3>{faceDisplayName[pendingSticker.face]} färben</h3>
+                  </div>
+                  <button type="button" className="secondary-button" onClick={() => setPendingSticker(null)}>
+                    Abbrechen
+                  </button>
+                </div>
+
+                <div className="palette-row">
+                  {cubeColorOrder.map((color) => (
+                    <button
+                      key={color}
+                      type="button"
+                      className={`palette-swatch${selectedCorrectionColor === color ? " palette-swatch--active" : ""}`}
+                      style={{ backgroundColor: cubeColorHex[color] }}
+                      title={cubeColorLabels[color]}
+                      onClick={() => applyViewportColor(pendingSticker.face, pendingSticker.index, color)}
+                    />
+                  ))}
+                </div>
+              </div>
+            ) : null}
           </div>
-
-          <Suspense fallback={<div className="cube-viewport cube-viewport--loading">3D-Viewport lädt …</div>}>
-            <CubeViewport state={viewportState} activeMove={activeMove} />
-          </Suspense>
-        </section>
-      </main>
-
-      <aside className="side-panel">
-        <header className="hero-panel hero-panel--compact">
-          <div>
-            <p className="eyebrow">Workflow</p>
-            <h2>Steuerung und 2D-Fläche</h2>
-          </div>
-          <p className="hero-panel__copy">
-            Die Bedienfläche bleibt erreichbar, nimmt aber nicht mehr permanent die gleiche Aufmerksamkeit wie der Viewport ein.
-          </p>
-        </header>
-
-        <nav className="step-nav">
-          {(["capture", "review", "solve", "playback"] as AppScreen[]).map((step) => (
-            <div key={step} className={`step-nav__item${screen === step ? " step-nav__item--active" : ""}`}>
-              <span>{screenLabels[step]}</span>
-            </div>
-          ))}
-        </nav>
-
-        <section className="panel-card panel-card--compact workbench-card">
-          <div className="panel-card__header">
-            <div>
-              <p className="eyebrow">2D</p>
-              <h3>Arbeitsfläche</h3>
-            </div>
-            <button
-              type="button"
-              className="secondary-button"
-              aria-expanded={workbenchOpen}
-              onClick={() => setWorkbenchOpen((current) => !current)}
-            >
-              {workbenchOpen ? "Einklappen" : "Öffnen"}
-            </button>
-          </div>
-
-          {workbenchOpen ? (
-            <section className="screen-slot">
-              {screen === "capture" ? <CaptureScreen /> : null}
-              {screen === "review" ? <ReviewScreen /> : null}
-              {screen === "solve" ? <SolveScreen /> : null}
-              {screen === "playback" ? <PlaybackScreen /> : null}
-            </section>
-          ) : (
-            <p className="panel-card__meta">
-              Aktiver Schritt: {screenLabels[screen]}. Öffne die 2D-Arbeitsfläche, wenn du Eingaben, Review oder Playback-Details brauchst.
-            </p>
-          )}
         </section>
 
-        {pwaState.isOffline ? (
-          <div className="inline-info" data-testid="offline-banner">
-            Offline: Es läuft der zuletzt geladene App-Stand aus dem lokalen Cache.
-          </div>
-        ) : null}
-
-        {pwaState.isOfflineReady ? (
-          <div className="success-text">
-            Offline bereit: Nach diesem erfolgreichen Laden bleibt die App-Shell auch ohne Netzwerk startfähig.
-          </div>
-        ) : null}
-
-        {pwaState.needsRefresh ? (
-          <div className="panel-card panel-card--compact">
+        <section className="flow-section">
+          <div className="flow-section__header">
             <div>
-              <p className="eyebrow">Update</p>
-              <h3>Neuer App-Stand verfügbar</h3>
+              <p className="eyebrow">Schritt 1</p>
+              <h2>Würfel fotografieren</h2>
             </div>
-            <p className="panel-card__meta">
-              Ein neuer Build liegt bereit. Das Update wird erst nach deiner Bestätigung aktiviert, damit App-Shell und lokaler Zustand konsistent bleiben.
+            <p className="flow-section__copy">
+              Fotografieren und Demo liegen direkt unter dem Modell. So bleibt der erste nächste Schritt klar sichtbar.
             </p>
-            <div className="action-row">
-              <button type="button" className="primary-button" onClick={() => void handleUpdate()}>
-                Update anwenden
-              </button>
-            </div>
           </div>
-        ) : null}
+          <CaptureScreen />
+        </section>
 
-        {pwaState.installPromptAvailable ? (
-          <div className="panel-card panel-card--compact">
-            <div>
-              <p className="eyebrow">Installation</p>
-              <h3>Cubism als App installieren</h3>
-            </div>
-            <p className="panel-card__meta">
-              Für den produktiven Offline-Einsatz empfiehlt sich die Installation als PWA auf dem Gerät.
-            </p>
-            <div className="action-row">
-              <button type="button" className="primary-button" onClick={() => void handleInstall()}>
-                App installieren
-              </button>
-            </div>
-          </div>
-        ) : null}
-
-        {pwaActionError ? <p className="inline-error">{pwaActionError}</p> : null}
-
-        <section className="panel-card panel-card--compact app-meta-card">
-          <div className="panel-card__header">
-            <div>
-              <p className="eyebrow">Projekt</p>
-              <h3>Build-Info</h3>
-            </div>
-            <div className="panel-card__actions">
-              <span className="confidence-badge">v{appMetadata.version}</span>
+        <section className="flow-section flow-section--secondary">
+          <div className="panel-card panel-card--compact workbench-card">
+            <div className="panel-card__header">
+              <div>
+                <p className="eyebrow">Weitere Werkzeuge</p>
+                <h3>Review, Solve und Playback</h3>
+              </div>
               <button
                 type="button"
                 className="secondary-button"
-                aria-expanded={projectInfoOpen}
-                onClick={() => setProjectInfoOpen((current) => !current)}
+                aria-expanded={workbenchOpen}
+                onClick={() => setWorkbenchOpen((current) => !current)}
               >
-                {projectInfoOpen ? "Weniger" : "Mehr"}
+                {workbenchOpen ? "Einklappen" : "Öffnen"}
               </button>
             </div>
+
+            {workbenchOpen ? (
+              <>
+                <nav className="step-nav">
+                  {(["capture", "review", "solve", "playback"] as AppScreen[]).map((step) => (
+                    <button
+                      key={step}
+                      type="button"
+                      className={`step-nav__item${screen === step ? " step-nav__item--active" : ""}`}
+                      onClick={() => setScreen(step)}
+                    >
+                      <span>{screenLabels[step]}</span>
+                    </button>
+                  ))}
+                </nav>
+                <section className="screen-slot">{renderToolScreen()}</section>
+              </>
+            ) : (
+              <p className="panel-card__meta">
+                Vertiefende Werkzeuge bleiben darunter gesammelt und treten erst dann nach vorne, wenn du sie wirklich brauchst.
+              </p>
+            )}
           </div>
 
-          {projectInfoOpen ? (
-            <>
-              <div className="app-meta-card__links">
-                {appMetadata.repositoryUrl ? (
-                  <a
-                    className="app-meta-card__link"
-                    href={appMetadata.repositoryUrl}
-                    target="_blank"
-                    rel="noreferrer"
+          <div className="flow-section__stack">
+            {pwaState.isOffline ? (
+              <div className="inline-info" data-testid="offline-banner">
+                Offline: Es läuft der zuletzt geladene App-Stand aus dem lokalen Cache.
+              </div>
+            ) : null}
+
+            {pwaState.isOfflineReady ? (
+              <div className="success-text">
+                Offline bereit: Nach diesem erfolgreichen Laden bleibt die App-Shell auch ohne Netzwerk startfähig.
+              </div>
+            ) : null}
+
+            {pwaState.needsRefresh ? (
+              <div className="panel-card panel-card--compact">
+                <div>
+                  <p className="eyebrow">Update</p>
+                  <h3>Neuer App-Stand verfügbar</h3>
+                </div>
+                <p className="panel-card__meta">
+                  Ein neuer Build liegt bereit. Das Update wird erst nach deiner Bestätigung aktiviert, damit App-Shell und lokaler Zustand konsistent bleiben.
+                </p>
+                <div className="action-row">
+                  <button type="button" className="primary-button" onClick={() => void handleUpdate()}>
+                    Update anwenden
+                  </button>
+                </div>
+              </div>
+            ) : null}
+
+            {pwaState.installPromptAvailable ? (
+              <div className="panel-card panel-card--compact">
+                <div>
+                  <p className="eyebrow">Installation</p>
+                  <h3>Cubism als App installieren</h3>
+                </div>
+                <p className="panel-card__meta">
+                  Für den produktiven Offline-Einsatz empfiehlt sich die Installation als PWA auf dem Gerät.
+                </p>
+                <div className="action-row">
+                  <button type="button" className="primary-button" onClick={() => void handleInstall()}>
+                    App installieren
+                  </button>
+                </div>
+              </div>
+            ) : null}
+
+            {pwaActionError ? <p className="inline-error">{pwaActionError}</p> : null}
+
+            <section className="panel-card panel-card--compact app-meta-card">
+              <div className="panel-card__header">
+                <div>
+                  <p className="eyebrow">Projekt</p>
+                  <h3>Build-Info</h3>
+                </div>
+                <div className="panel-card__actions">
+                  <span className="confidence-badge">v{appMetadata.version}</span>
+                  <button
+                    type="button"
+                    className="secondary-button"
+                    aria-expanded={projectInfoOpen}
+                    onClick={() => setProjectInfoOpen((current) => !current)}
                   >
-                    GitHub-Repository
-                  </a>
-                ) : (
-                  <span className="panel-card__meta">Kein Repository-Link in den Build-Metadaten hinterlegt.</span>
-                )}
+                    {projectInfoOpen ? "Weniger" : "Mehr"}
+                  </button>
+                </div>
               </div>
 
-              <div className="app-meta-card__groups">
-                <section className="app-meta-card__group">
-                  <div className="app-meta-card__group-header">
-                    <strong>Dependencies</strong>
-                    <span>{appMetadata.dependencies.length}</span>
+              {projectInfoOpen ? (
+                <>
+                  <div className="app-meta-card__links">
+                    {appMetadata.repositoryUrl ? (
+                      <a
+                        className="app-meta-card__link"
+                        href={appMetadata.repositoryUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        GitHub-Repository
+                      </a>
+                    ) : (
+                      <span className="panel-card__meta">Kein Repository-Link in den Build-Metadaten hinterlegt.</span>
+                    )}
                   </div>
-                  <ul className="app-meta-card__list">
-                    {appMetadata.dependencies.map((dependency) => (
-                      <li key={dependency.name}>
-                        <span>{dependency.name}</span>
-                        <code>{dependency.version}</code>
-                      </li>
-                    ))}
-                  </ul>
-                </section>
 
-                <section className="app-meta-card__group">
-                  <div className="app-meta-card__group-header">
-                    <strong>Dev-Dependencies</strong>
-                    <span>{appMetadata.devDependencies.length}</span>
+                  <div className="app-meta-card__groups">
+                    <section className="app-meta-card__group">
+                      <div className="app-meta-card__group-header">
+                        <strong>Dependencies</strong>
+                        <span>{appMetadata.dependencies.length}</span>
+                      </div>
+                      <ul className="app-meta-card__list">
+                        {appMetadata.dependencies.map((dependency) => (
+                          <li key={dependency.name}>
+                            <span>{dependency.name}</span>
+                            <code>{dependency.version}</code>
+                          </li>
+                        ))}
+                      </ul>
+                    </section>
+
+                    <section className="app-meta-card__group">
+                      <div className="app-meta-card__group-header">
+                        <strong>Dev-Dependencies</strong>
+                        <span>{appMetadata.devDependencies.length}</span>
+                      </div>
+                      <ul className="app-meta-card__list">
+                        {appMetadata.devDependencies.map((dependency) => (
+                          <li key={dependency.name}>
+                            <span>{dependency.name}</span>
+                            <code>{dependency.version}</code>
+                          </li>
+                        ))}
+                      </ul>
+                    </section>
                   </div>
-                  <ul className="app-meta-card__list">
-                    {appMetadata.devDependencies.map((dependency) => (
-                      <li key={dependency.name}>
-                        <span>{dependency.name}</span>
-                        <code>{dependency.version}</code>
-                      </li>
-                    ))}
-                  </ul>
-                </section>
-              </div>
-            </>
-          ) : (
-            <p className="panel-card__meta">
-              Version und Paketlisten bleiben verfügbar, treten aber standardmäßig hinter den eigentlichen Solve-Flow zurück.
-            </p>
-          )}
+                </>
+              ) : (
+                <p className="panel-card__meta">
+                  Projektmetadaten und Abhängigkeiten bleiben vorhanden, aber bewusst klar unterhalb des primären Flows.
+                </p>
+              )}
+            </section>
+          </div>
         </section>
-      </aside>
+      </main>
 
       {debugConsoleOpen ? (
         <div className="debug-console-layer" role="presentation">
