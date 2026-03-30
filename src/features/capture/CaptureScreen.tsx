@@ -29,6 +29,7 @@ export function CaptureScreen() {
   const [lastCapturedFace, setLastCapturedFace] = useState<Face | null>(null);
   const [streamReady, setStreamReady] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const overlayRef = useRef<HTMLElement | null>(null);
 
   const capturedGuidedFaces = guidedCameraFaces.filter((face) => isFaceCaptured(captureSession.faces[face]));
   const nextGuidedFace = guidedCameraFaces.find((face) => !isFaceCaptured(captureSession.faces[face])) ?? null;
@@ -58,6 +59,22 @@ export function CaptureScreen() {
 
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+    window.scrollTo({ top: 0, left: 0 });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+
+    requestAnimationFrame(() => {
+      if (!overlayRef.current) {
+        return;
+      }
+
+      if (typeof overlayRef.current.scrollTo === "function") {
+        overlayRef.current.scrollTo({ top: 0, left: 0 });
+        return;
+      }
+
+      overlayRef.current.scrollTop = 0;
+    });
 
     return () => {
       document.body.style.overflow = previousOverflow;
@@ -326,6 +343,7 @@ export function CaptureScreen() {
             aria-modal="true"
             aria-labelledby="camera-overlay-title"
             data-testid="camera-overlay"
+            ref={overlayRef}
           >
             <div className="camera-overlay__header">
               <div>
