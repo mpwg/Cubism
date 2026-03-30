@@ -9,7 +9,15 @@ const manifestEntries = self.__WB_MANIFEST as Array<{ url: string }>;
 const precacheName = "cubism-precache-v2";
 const runtimeName = "cubism-runtime-v2";
 const navigationCacheName = "cubism-navigation-v2";
-const precacheUrls = Array.from(new Set(["/", "/index.html", ...manifestEntries.map((entry) => entry.url)]));
+const precacheUrls = Array.from(
+  new Map(
+    ["/", "/index.html", ...manifestEntries.map((entry) => entry.url)].map((url) => {
+      const normalizedUrl = new URL(url, serviceWorkerSelf.location.origin);
+      const cacheKey = normalizedUrl.pathname === "/index.html" ? "/" : `${normalizedUrl.pathname}${normalizedUrl.search}`;
+      return [cacheKey, normalizedUrl.pathname + normalizedUrl.search] as const;
+    })
+  ).values()
+);
 const offlineDocument = `<!doctype html>
 <html lang="de">
   <head>
