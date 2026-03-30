@@ -1,4 +1,4 @@
-import { Suspense, lazy, startTransition } from "react";
+import { Suspense, lazy } from "react";
 import { formatMove } from "@/domain/cube/move";
 import { FaceGrid } from "@/features/shared/FaceGrid";
 import { getStatusCopy, getStatusTitle, useCubismController } from "@/features/workspace/useCubismController";
@@ -71,7 +71,6 @@ export function CubismWorkspace(controller: CubismController) {
     applyViewportColor,
     toggleInspector,
     setPendingSticker,
-    loadDemo,
     setPlaybackPlaying,
     setPlaybackIndex,
     stopAndRun,
@@ -235,15 +234,7 @@ export function CubismWorkspace(controller: CubismController) {
                     ))}
                   </div>
 
-                  <div className="command-bar command-bar--compact">
-                    <button type="button" className="primary-button" onClick={() => void openCameraOverlay()}>
-                      Cube scannen
-                    </button>
-                    <button type="button" className="ghost-button" onClick={() => startTransition(() => loadDemo(dimension))}>
-                      Demo laden
-                    </button>
-                  </div>
-
+                  <p className="inspector__copy">Standardpfad: drei benachbarte Seiten scannen, danach direkt weiter in Prüfung und Lösung.</p>
                   <p className="inspector__copy">Demo-Scramble: {demoScrambleLabel}</p>
 
                   <div className="guided-face-strip" aria-label="Scan-Fortschritt">

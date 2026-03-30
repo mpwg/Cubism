@@ -16,11 +16,12 @@ describe("App workspace", () => {
     render(<App />);
 
     expect(screen.getByRole("heading", { name: "Cubism" })).toBeVisible();
-    expect(screen.getAllByRole("button", { name: "Cube scannen" })).toHaveLength(2);
+    expect(screen.getAllByRole("button", { name: "Cube scannen" })).toHaveLength(1);
     expect(screen.getByRole("button", { name: "Cube manuell bearbeiten" })).toBeVisible();
     expect(screen.getByRole("button", { name: "Lösen" })).toBeVisible();
     expect(screen.getByRole("button", { name: "Tipp" })).toBeVisible();
     expect(screen.getByRole("button", { name: "Zurücksetzen" })).toBeVisible();
+    expect(screen.queryByRole("button", { name: "Demo laden" })).not.toBeInTheDocument();
     expect(screen.getByText("3D-Viewport lädt …")).toBeVisible();
   });
 
