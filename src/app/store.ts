@@ -4,7 +4,7 @@ import type { AppScreen, SolveStatus } from "@/app/types";
 import { buildCubeStateFromCaptureSession } from "@/domain/cube/cube-state";
 import { createDemoCaptureSession, createSolvedCaptureSession } from "@/domain/cube/demo";
 import { CubeColor, type CaptureSession, type CubeDimension, type CubeState, type Face, type FaceCapture, type PlaybackState, type SolveResult, type ValidationResult } from "@/domain/cube/types";
-import { createEmptyCaptureSession, mergeFaceCapture, setCaptureStickerColor } from "@/domain/capture/session";
+import { mergeFaceCapture, setCaptureStickerColor } from "@/domain/capture/session";
 import { buildPlaybackStates } from "@/app/solve-playback";
 
 const defaultPlaybackState: PlaybackState = {

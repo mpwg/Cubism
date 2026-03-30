@@ -43,8 +43,8 @@ export const appMetadata = {
     { name: "Three.js", license: "MIT", url: "https://threejs.org" },
     { name: "React Three Fiber", license: "MIT", url: "https://github.com/pmndrs/react-three-fiber" },
     { name: "Comlink", license: "Apache-2.0", url: "https://github.com/GoogleChromeLabs/comlink" },
-    { name: "min2phase.js", license: "MIT", url: "https://www.npmjs.com/package/min2phase.js" },
-    { name: "OpenCV.js", license: "Apache-2.0", url: "https://opencv.org" },
-    { name: "Rubik", license: "OFL-1.1", url: "https://fontsource.org/fonts/rubik" }
+    { name: "min2phase.js", license: "(MIT or GPL-3.0)", url: "https://github.com/cs0x7f/min2phase.js" },
+    { name: "OpenCV.js", license: "Apache-2.0", url: "https://github.com/TechStark/opencv-js" },
+    { name: "Rubik", license: "OFL-1.1", url: "https://github.com/fontsource/font-files" }
   ] as ComponentEntry[]
 };

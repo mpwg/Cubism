@@ -25,7 +25,7 @@
 
 Cubism ist eine vollständig client-seitige Webanwendung für das Lösen von Rubik's Cubes im Browser. Der Schwerpunkt liegt auf einem soliden `3x3`-Pfad, ohne Server, ohne Cloud-Zwang und mit einer Oberfläche, die nicht nur eine Zugliste ausspuckt, sondern den Lösungsweg verständlich macht.
 
-Die App kombiniert lokale Erfassung, fachliche Validierung, Solver-Ausführung in Workern und eine visuelle Wiedergabe des Lösungswegs. Sie ist als PWA angelegt, offline nutzbar und hält die Tür für `4x4` offen, ohne den aktuellen Stand künstlich größer zu reden als er ist.
+Die App kombiniert lokale Erfassung, fachliche Validierung, Solver-Ausführung in Workern und eine visuelle Wiedergabe des Lösungswegs. Sie ist als PWA angelegt, arbeitet aber im UX bewusst stateless: beim Schließen der Session bleibt kein Anwendungszustand im Client zurück.
 
 ## Was Cubism bereits kann
 
@@ -35,7 +35,7 @@ Die App kombiniert lokale Erfassung, fachliche Validierung, Solver-Ausführung i
 - Zustände validieren und auf Plausibilität prüfen
 - `3x3`-Lösungen lokal berechnen
 - Lösungswege als Schrittfolge und im 3D-Viewport abspielen
-- Fortschritt lokal speichern, damit Sitzungen nicht sofort verloren gehen
+- Würfelzustände ohne persistente Sessiondaten im Client bearbeiten
 
 ## Warum das Projekt interessant ist
 
@@ -67,7 +67,6 @@ Konkret vorhanden sind bereits:
 - Web Worker über Comlink
 - `min2phase.js` für den `3x3`-Solver
 - Three.js / React Three Fiber für die Würfelansicht
-- Dexie für lokale Persistenz
 - Vitest und Playwright für Tests
 
 ## Schnellstart
@@ -119,7 +118,6 @@ src/
     playback/          Wiedergabe und Viewport
     shared/            wiederverwendbare UI-Bausteine
   lib/
-    persistence/       lokale Speicherung
     workers/           Worker-Clients
   pwa/                 Registrierung und Service Worker
   workers/             Solver- und Capture-Worker
