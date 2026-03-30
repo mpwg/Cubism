@@ -2,10 +2,10 @@ import { create } from "zustand";
 import { subscribeWithSelector } from "zustand/middleware";
 import type { AppScreen, SolveStatus } from "@/app/types";
 import { buildCubeStateFromCaptureSession } from "@/domain/cube/cube-state";
-import { createDemoCaptureSession } from "@/domain/cube/demo";
+import { createDemoCaptureSession, createSolvedCaptureSession } from "@/domain/cube/demo";
 import { CubeColor, type CaptureSession, type CubeDimension, type CubeState, type Face, type FaceCapture, type PlaybackState, type SolveResult, type ValidationResult } from "@/domain/cube/types";
 import { createEmptyCaptureSession, mergeFaceCapture, setCaptureStickerColor } from "@/domain/capture/session";
-import { buildPlaybackStates } from "@/lib/persistence/snapshot";
+import { buildPlaybackStates } from "@/app/solve-playback";
 
 const defaultPlaybackState: PlaybackState = {
   moveIndex: 0,
@@ -24,11 +24,12 @@ function phaseIndexFromMoveIndex(result: SolveResult | null, moveIndex: number):
 }
 
 function createInitialState(dimension: CubeDimension = 3) {
+  const captureSession = createSolvedCaptureSession(dimension);
   return {
     dimension,
     screen: "capture" as AppScreen,
-    captureSession: createEmptyCaptureSession(dimension),
-    cubeState: null as CubeState | null,
+    captureSession,
+    cubeState: buildCubeStateFromCaptureSession(captureSession),
     validationResult: null as ValidationResult | null,
     solveStatus: "idle" as SolveStatus,
     solveResult: null as SolveResult | null,
@@ -67,7 +68,6 @@ export interface AppStore {
   jumpToPhase: (phaseIndex: number) => void;
   loadDemo: (dimension?: CubeDimension) => void;
   resetAll: () => void;
-  hydrate: (state: Partial<AppStore> & { playbackStates?: CubeState[] }) => void;
 }
 
 export const useAppStore = create<AppStore>()(
@@ -193,13 +193,6 @@ export const useAppStore = create<AppStore>()(
     resetAll() {
       set({
         ...createInitialState(get().dimension)
-      });
-    },
-    hydrate(state) {
-      set({
-        ...get(),
-        ...state,
-        playbackStates: state.playbackStates ?? get().playbackStates
       });
     }
   }))
