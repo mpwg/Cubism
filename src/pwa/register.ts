@@ -1,5 +1,5 @@
 import { registerSW } from "virtual:pwa-register";
-import { registerInstallPrompt, registerUpdateHandler, setNeedsRefresh, setOfflineReady, setOfflineStatus, type BeforeInstallPromptEvent } from "@/pwa/state";
+import { registerUpdateHandler, setNeedsRefresh, setOfflineReady, setOfflineStatus } from "@/pwa/state";
 
 const updateServiceWorker = registerSW({
   immediate: true,
@@ -20,10 +20,3 @@ setOfflineStatus(typeof navigator !== "undefined" ? navigator.onLine === false :
 
 window.addEventListener("online", () => setOfflineStatus(false));
 window.addEventListener("offline", () => setOfflineStatus(true));
-window.addEventListener("beforeinstallprompt", (event) => {
-  event.preventDefault();
-  registerInstallPrompt(event as BeforeInstallPromptEvent);
-});
-window.addEventListener("appinstalled", () => {
-  registerInstallPrompt(null);
-});
