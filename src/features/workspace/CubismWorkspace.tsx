@@ -69,6 +69,7 @@ export function CubismWorkspace(controller: CubismController) {
     handleReset,
     handleStickerClick,
     applyViewportColor,
+    handleScanClick,
     toggleInspector,
     setPendingSticker,
     setPlaybackPlaying,
@@ -144,7 +145,7 @@ export function CubismWorkspace(controller: CubismController) {
                 {solveError ? <span className="inline-message inline-message--error">{solveError}</span> : null}
               </div>
               <div className="stage-card__actions">
-                <button type="button" className={`ghost-button${inspectorMode === "scan" ? " ghost-button--active" : ""}`} onClick={() => toggleInspector("scan")}>
+                <button type="button" className={`ghost-button${inspectorMode === "scan" ? " ghost-button--active" : ""}`} onClick={handleScanClick}>
                   Cube scannen
                 </button>
                 <button type="button" className={`ghost-button${inspectorMode === "edit" ? " ghost-button--active" : ""}`} onClick={() => toggleInspector("edit")}>
