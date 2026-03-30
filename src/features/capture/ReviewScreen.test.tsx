@@ -113,4 +113,22 @@ describe("ReviewScreen", () => {
     expect(useAppStore.getState().selectedCorrectionColor).toBe(CubeColor.Red);
     expect(screen.getByText(/Aktive Farbe: Rot/i)).toBeVisible();
   });
+
+  it("bleibt bei altem oder unbekanntem Validation-Status renderbar", () => {
+    useAppStore.getState().setValidationResult({
+      ok: false,
+      status: "legacy-state" as unknown as ValidationResult["status"],
+      errors: [],
+      groups: [],
+      highlightedFaces: [],
+      highlightedStickers: [],
+      nextAction: "Status aus altem Snapshot.",
+      reduced: false
+    });
+
+    render(<ReviewScreen />);
+
+    expect(screen.getByText(/Status unbekannt|Noch unvollständig/i)).toBeVisible();
+    expect(screen.getByText(/Status aus altem Snapshot/i)).toBeVisible();
+  });
 });
