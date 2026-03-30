@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { App } from "@/app/App";
 import { useAppStore } from "@/app/store";
 
@@ -32,5 +33,16 @@ describe("App workspace", () => {
     expect(screen.getByRole("link", { name: /AGPL-3.0-or-later/i })).toBeVisible();
     expect(screen.getByText("React")).toBeVisible();
     expect(screen.queryByText(/^React 19$/)).not.toBeInTheDocument();
+  });
+
+  it("öffnet den Kamera-Scan beim Klick auf Cube scannen", async () => {
+    const user = userEvent.setup();
+
+    render(<App />);
+
+    await user.click(screen.getByRole("button", { name: "Cube scannen" }));
+
+    expect(screen.getByTestId("camera-overlay")).toBeVisible();
+    expect(screen.getAllByText(/kein Kamerazugriff im Browser verfügbar/i)).toHaveLength(2);
   });
 });

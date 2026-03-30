@@ -401,6 +401,11 @@ export function useCubismController() {
     setInspectorMode((current) => (current === mode ? null : mode));
   }
 
+  function handleScanClick() {
+    setInspectorMode("scan");
+    void openCameraOverlay();
+  }
+
   function stopAndRun(action: () => void) {
     setPlaybackPlaying(false);
     action();
@@ -473,6 +478,7 @@ export function useCubismController() {
     handleReset,
     handleStickerClick,
     applyViewportColor,
+    handleScanClick,
     toggleInspector,
     setPendingSticker,
     loadDemo,
